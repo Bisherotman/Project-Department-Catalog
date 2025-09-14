@@ -55,35 +55,11 @@
       </div>
       <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
         <button id="login" class="btn primary">تسجيل الدخول</button>
-        <button id="logout" class="btn">تسجيل الخروج</button>
+        <button id="logout" class="btn" style="display:none">تسجيل الخروج</button>
         <div id="who" class="muted" style="margin-inline-start:auto"></div>
       </div>
       <div id="ok" class="ok"></div>
       <div id="err" class="err"></div>
-    </div>
-
-    <div class="spacer"></div>
-
-    <!-- إدارة البراند/الموديل -->
-    <div class="card">
-      <h3>إدارة البراندات والموديلات</h3>
-      <div class="row">
-        <div class="input">
-          <label>إضافة براند</label>
-          <div style="display:flex; gap:8px;">
-            <input id="brandName" placeholder="مثال: GROHE" style="flex:1">
-            <button id="saveBrand" class="btn">حفظ البراند</button>
-          </div>
-        </div>
-        <div class="input">
-          <label>إضافة موديل للبراند المحدد</label>
-          <div style="display:flex; gap:8px;">
-            <input id="modelName" placeholder="اسم الموديل" style="flex:1">
-            <button id="saveModel" class="btn">حفظ الموديل</button>
-          </div>
-          <span class="muted">يتم ربط الموديل بالبراند المختار في فورم المنتج أدناه.</span>
-        </div>
-      </div>
     </div>
 
     <div class="spacer"></div>
@@ -137,16 +113,15 @@
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ⚠️ config
+    // ✅ config (أُزيل التكرار الذي كان يسبب كسر السكربت)
     const firebaseConfig = {
-  const firebaseConfig = {
-  apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-  authDomain: "projects-catalog.firebaseapp.com",
-  projectId: "projects-catalog",
-  storageBucket: "projects-catalog.firebasestorage.app",
-  messagingSenderId: "813379257336",
-  appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-};
+      apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
+      authDomain: "projects-catalog.firebaseapp.com",
+      projectId: "projects-catalog",
+      storageBucket: "projects-catalog.firebasestorage.app",
+      messagingSenderId: "813379257336",
+      appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
+    };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -161,33 +136,44 @@
 
     function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
     function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
-    function setFormEnabled(en){ formCard.classList.toggle("disabled-mask", !en); [...formCard.querySelectorAll("input,select,button")].forEach(el=>{ if(el.id!=='logout' && el.id!=='saveBrand' && el.id!=='saveModel') el.disabled=!en; }); }
+    function setFormEnabled(en){
+      formCard.classList.toggle("disabled-mask", !en);
+      [...formCard.querySelectorAll("input,select,button")].forEach(el=>{
+        if(el.id!=='logout') el.disabled=!en;
+      });
+    }
 
     // Auth
     loginBtn.addEventListener('click', async()=>{
       const email = $("#email").value.trim();
       const password = $("#password").value;
-      try{ await signInWithEmailAndPassword(auth, email, password); showOK("تم تسجيل الدخول"); }
-      catch(e){ showERR(e); }
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+        showOK("تم تسجيل الدخول");
+      }catch(e){ showERR(e); }
     });
-    logoutBtn.addEventListener('click', async()=>{ try{ await signOut(auth); showOK("تم تسجيل الخروج"); } catch(e){ showERR(e); } });
+    logoutBtn.addEventListener('click', async()=>{
+      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
+    });
 
     onAuthStateChanged(auth, (user)=>{
       if(user){
         const name = user.displayName || user.email || 'مستخدم';
         who.textContent = `المستخدم: ${name}`;
         loginBtn.style.display = 'none';
+        logoutBtn.style.display = '';
         $("#email").disabled = true; $("#password").disabled = true;
         setFormEnabled(true);
       }else{
         who.textContent = "";
         loginBtn.style.display = '';
+        logoutBtn.style.display = 'none';
         $("#email").disabled = false; $("#password").disabled = false;
         setFormEnabled(false);
       }
     });
 
-    // Load categories from 'categories_fixed' (docId = main cat, field 'subs' = array)
+    // Load categories from 'categories_fixed' (docId = main, field 'subs' = array)
     let catData = [];
     async function loadCategories(){
       const snap = await getDocs(query(collection(db,'categories_fixed')));
@@ -212,13 +198,12 @@
     }
     $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
 
-    // Load brands and models
+    // Load brands and models (للقوائم فقط - الإدارة نُقلت لصفحة الأصناف)
     async function loadBrands(){
       const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
       const sel = $("#brandSelect"); sel.innerHTML = "";
       let list = [];
       if(snap){ snap.forEach(d=> list.push(d.id)); }
-      if(list.length===0) list = []; // لا براندات افتراضية
       list.sort((a,b)=>a.localeCompare(b,'en')).forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
       await fillModels(sel.value);
     }
@@ -233,33 +218,6 @@
       if(names.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد موديلات لهذا البراند —'; sel.appendChild(o); }
     }
     $("#brandSelect").addEventListener('change', e=> fillModels(e.target.value));
-
-    // Save brand
-    $("#saveBrand").addEventListener('click', async()=>{
-      const name = ($("#brandName").value||'').trim();
-      if(!name) return;
-      try{
-        await setDoc(doc(db,'brands', name), { createdAt: serverTimestamp() }, { merge:true });
-        showOK("✔ تم حفظ البراند");
-        $("#brandName").value = "";
-        await loadBrands();
-      }catch(e){ showERR(e); }
-    });
-
-    // Save model for selected brand
-    $("#saveModel").addEventListener('click', async()=>{
-      const brand = $("#brandSelect").value || '';
-      const name = ($("#modelName").value||'').trim();
-      if(!brand) return showERR("اختر البراند أولاً");
-      if(!name) return;
-      try{
-        const id = `${brand}__${name}`;
-        await setDoc(doc(db,'models', id), { brand, name, createdAt: serverTimestamp() }, { merge:true });
-        showOK("✔ تم حفظ الموديل");
-        $("#modelName").value = "";
-        await fillModels(brand);
-      }catch(e){ showERR(e); }
-    });
 
     // Save product
     $("#saveProduct").addEventListener('click', async()=>{
