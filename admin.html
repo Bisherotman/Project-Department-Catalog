@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة إدارة الكتالوج</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' https: data:; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com;">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{background:#f6f7f9}
+    .admin{max-width:900px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:720px){.row{grid-template-columns:1fr}}
+    .input{display:grid;gap:6px}
+    .input input,.input select,.input textarea{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
+    .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
+    .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
+    .muted{color:#616a77;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="admin">
+    <h2>لوحة الإدارة</h2>
+    <p class="muted">سجّل دخولك بحساب Google المصرّح لإضافة المنتجات.</p>
+
+    <div style="display:flex; gap:8px; margin:12px 0; align-items:center;">
+      <button id="login" class="btn primary">تسجيل الدخول (Google)</button>
+      <button id="logout" class="btn">تسجيل الخروج</button>
+      <div id="uid" class="muted"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>إضافة منتج</h3>
+      <div class="row">
+        <div class="input">
+          <label>التصنيف (مثال: WC)</label>
+          <input id="cat" placeholder="WC / Bidet / ...">
+        </div>
+        <div class="input">
+          <label>التصنيف الفرعي (مثال: Wall-Hung)</label>
+          <input id="sub" placeholder="Wall-Hung / Floor-Standing / ...">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input">
+          <label>البراند</label>
+          <input id="brand" placeholder="Brand">
+        </div>
+        <div class="input">
+          <label>الموديل</label>
+          <input id="model" placeholder="Model">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input">
+          <label>SAP Code</label>
+          <input id="sap" placeholder="SAP code">
+        </div>
+        <div class="input">
+          <label>Factory Code</label>
+          <input id="factory" placeholder="Factory code">
+        </div>
+      </div>
+      <div class="input">
+        <label>صورة المنتج</label>
+        <input id="img" type="file" accept="image/*">
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <button id="save" class="btn primary">حفظ المنتج</button>
+        <span id="msg" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    // TODO: ضع إعدادات مشروعك هنا
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "",
+      appId: ""
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const provider = new GoogleAuthProvider();
+    const $ = (s)=>document.querySelector(s);
+
+    $("#login").addEventListener("click", async()=>{
+      try{ await signInWithPopup(auth, provider); }catch(e){ alert(e.message); }
+    });
+    $("#logout").addEventListener("click", async()=> signOut(auth));
+
+    onAuthStateChanged(auth, (user)=>{
+      $("#uid").textContent = user ? `UID: ${user.uid}` : "غير مسجل الدخول";
+    });
+
+    $("#save").addEventListener("click", async()=>{
+      const cat = $("#cat").value.trim();
+      const sub = $("#sub").value.trim();
+      const brand = $("#brand").value.trim();
+      const model = $("#model").value.trim();
+      const sap = $("#sap").value.trim();
+      const factory = $("#factory").value.trim();
+      const file = $("#img").files?.[0] || null;
+
+      if(!cat || !sub){ alert("رجاءً أدخل التصنيف والتصنيف الفرعي"); return; }
+
+      let imageUrl = "";
+      try{
+        if(file){
+          const r = ref(storage, `products/${cat}/${Date.now()}_${file.name}`);
+          await uploadBytes(r, file);
+          imageUrl = await getDownloadURL(r);
+        }
+        const id = `${cat}-${sub}-${Date.now()}`;
+        const payload = {
+          cat, sub, path: `${cat} - ${sub}`,
+          brand, model, sapCode: sap, factoryCode: factory,
+          imageUrl, createdAt: serverTimestamp()
+        };
+        await setDoc(doc(db, "products", id), payload);
+        $("#msg").textContent = "✔ تم الحفظ وظهر المنتج في الصفحة الفرعية مباشرة";
+        // مسح الحقول
+        $("#brand").value = $("#model").value = $("#sap").value = $("#factory").value = "";
+        $("#img").value = "";
+      }catch(err){
+        $("#msg").textContent = "خطأ: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
