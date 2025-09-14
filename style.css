@@ -73,6 +73,20 @@ body.is-side-open .backdrop{opacity:1; pointer-events:auto}
 .tiles-head{margin:8px 0 14px; display:flex; align-items:center; justify-content:space-between; gap:12px}
 .tiles-head h2{margin:0; font-size:22px; font-weight:800; color:#0f172a}
 
+.admin-link {
+  display: inline-block;
+  padding: .7rem 1.2rem;
+  border-radius: 12px;
+  background: #6c1d2c;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.admin-link:hover {
+  filter: brightness(0.95);
+}
+
 /* Show all */
 .switch{display:inline-flex; align-items:center; gap:10px; cursor:pointer; background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 12px; box-shadow:0 2px 8px rgba(0,0,0,.06); font-weight:700; color:var(--ink); transition:transform .12s ease, background-color .15s ease}
 .switch:hover{transform:translateY(-1px)}
