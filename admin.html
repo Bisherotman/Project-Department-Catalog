@@ -1,123 +1,147 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>لوحة الإدارة</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      background-color: #f6f7f9;
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #111827;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      max-width: 1200px;
+      margin: auto;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .row > div {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    input, select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 12px;
+      background-color: #6c1d2c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #5a1524;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>إضافة منتج</h1>
-    <form id="productForm">
-      <label>التصنيف الأساسي:</label>
-      <select id="mainCategory" required></select>
-
-      <label>التصنيف الفرعي:</label>
-      <select id="subCategory" required></select>
-
-      <label>البراند:</label>
-      <input type="text" id="brand" required />
-
-      <label>الموديل:</label>
-      <input type="text" id="model" required />
-
-      <label>كود المصنع:</label>
-      <input type="text" id="factoryCode" required />
-
-      <label>كود SAP:</label>
-      <input type="text" id="sapCode" required />
-
-      <label>رابط الصورة:</label>
-      <input type="text" id="imageUrl" placeholder="https://... أو assets/products/WC/xyz.webp" />
-
-      <button type="submit">إضافة المنتج</button>
-      <p id="message"></p>
-    </form>
+  <div class="card">
+    <h1>🛠️ إضافة منتج</h1>
+    <div class="row">
+      <div>
+        <label for="mainCategory">التصنيف الأساسي:</label>
+        <select id="mainCategory"></select>
+      </div>
+      <div>
+        <label for="subCategory">التصنيف الفرعي:</label>
+        <select id="subCategory"></select>
+      </div>
+      <div>
+        <label for="brand">البراند:</label>
+        <input type="text" id="brand" />
+      </div>
+      <div>
+        <label for="model">الموديل:</label>
+        <input type="text" id="model" />
+      </div>
+      <div>
+        <label for="factory">كود المصنع:</label>
+        <input type="text" id="factory" />
+      </div>
+      <div>
+        <label for="sap">كود SAP:</label>
+        <input type="text" id="sap" />
+      </div>
+      <div style="flex: 2;">
+        <label for="imageUrl">رابط الصورة:</label>
+        <input type="text" id="imageUrl" placeholder="https://... أو assets/WC/xyz.webp" />
+      </div>
+    </div>
+    <button onclick="addProduct()">➕ إضافة المنتج</button>
+    <div id="msg" style="margin-top:10px; font-size:14px;"></div>
   </div>
 
-  <script src="categories-data.js"></script>
+  <script src="subcategory.js"></script>
   <script>
-    // تعبئة التصنيفات من categories-data.js
-    const mainCategorySelect = document.getElementById("mainCategory");
-    const subCategorySelect = document.getElementById("subCategory");
+    const mainCat = document.getElementById("mainCategory");
+    const subCat = document.getElementById("subCategory");
+    const msg = document.getElementById("msg");
 
     categories.forEach(cat => {
       const opt = document.createElement("option");
       opt.value = cat.name;
       opt.textContent = cat.name;
-      mainCategorySelect.appendChild(opt);
+      mainCat.appendChild(opt);
     });
 
-    mainCategorySelect.addEventListener("change", () => {
-      const selected = categories.find(c => c.name === mainCategorySelect.value);
-      subCategorySelect.innerHTML = "";
-      if (selected) {
+    mainCat.addEventListener("change", () => {
+      const selected = categories.find(c => c.name === mainCat.value);
+      subCat.innerHTML = "";
+      if (selected && selected.subcategories.length) {
         selected.subcategories.forEach(sub => {
           const opt = document.createElement("option");
           opt.value = sub;
           opt.textContent = sub;
-          subCategorySelect.appendChild(opt);
+          subCat.appendChild(opt);
         });
       }
     });
 
     window.addEventListener("DOMContentLoaded", () => {
-      if (categories.length > 0) {
-        mainCategorySelect.value = categories[0].name;
-        mainCategorySelect.dispatchEvent(new Event("change"));
-      }
+      mainCat.value = categories[0].name;
+      mainCat.dispatchEvent(new Event("change"));
     });
 
-    // إعداد Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-      authDomain: "projects-catalog.firebaseapp.com",
-      projectId: "projects-catalog",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // إضافة منتج عند إرسال النموذج
-    const form = document.getElementById("productForm");
-    const msg = document.getElementById("message");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const cat = mainCategorySelect.value;
-      const sub = subCategorySelect.value;
-      const brand = document.getElementById("brand").value;
-      const model = document.getElementById("model").value;
-      const factory = document.getElementById("factoryCode").value;
-      const sap = document.getElementById("sapCode").value;
-      const imageUrl = document.getElementById("imageUrl").value;
-      const path = `${cat} - ${sub}`;
-
-      try {
-        const id = `${cat}-${sub}-${Date.now()}`;
-        await db.collection("products").doc(id).set({
-          cat, sub, path,
-          brand, model,
-          factoryCode: factory,
-          sapCode: sap,
-          imageUrl,
-          sap: sap,
-          factory: factory,
-          photo: imageUrl,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        msg.textContent = "✔ تم حفظ المنتج بنجاح";
-        msg.style.color = "green";
-        form.reset();
-        mainCategorySelect.dispatchEvent(new Event("change"));
-      } catch (error) {
-        msg.textContent = "خطأ: " + error.message;
-        msg.style.color = "red";
-      }
-    });
+    function addProduct() {
+      const product = {
+        mainCategory: mainCat.value,
+        subCategory: subCat.value,
+        brand: document.getElementById("brand").value,
+        model: document.getElementById("model").value,
+        factory: document.getElementById("factory").value,
+        sap: document.getElementById("sap").value,
+        imageUrl: document.getElementById("imageUrl").value,
+        createdAt: new Date().toISOString()
+      };
+      console.log("📦 المنتج:", product);
+      msg.textContent = "✔ تم حفظ المنتج (في الذاكرة المحلية فقط).";
+      msg.style.color = "green";
+    }
   </script>
 </body>
 </html>
