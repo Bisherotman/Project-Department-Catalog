@@ -172,9 +172,7 @@
         setFormEnabled(false);
       }
     });
-    
-   import { categories } from './categories-data.js';
-
+  
 function loadCategories(){
   const catSel = document.querySelector("#catSelect");
   const subSel = document.querySelector("#subSelect");
@@ -266,8 +264,13 @@ $("#saveProduct").addEventListener('click', async ()=>{
     // Init
     (async()=>{
       await loadCategories();
-      await loadBrands();
     })().catch(console.error);
   </script>
+
+  <script type="module">
+  import { categories } from './categories-data.js';
+  window.categories = categories;
+</script>
+
 </body>
 </html>
