@@ -198,26 +198,52 @@
     }
     $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
 
-    // Load brands and models (للقوائم فقط - الإدارة نُقلت لصفحة الأصناف)
-    async function loadBrands(){
-      const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
-      const sel = $("#brandSelect"); sel.innerHTML = "";
-      let list = [];
-      if(snap){ snap.forEach(d=> list.push(d.id)); }
-      list.sort((a,b)=>a.localeCompare(b,'en')).forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
-      await fillModels(sel.value);
-    }
-    async function fillModels(brand){
-      const sel = $("#modelSelect"); sel.innerHTML = "";
-      if(!brand){ const o=document.createElement('option'); o.value=''; o.textContent='—'; sel.appendChild(o); return; }
-      const qRef = query(collection(db,'models'), where('brand','==', brand));
-      const snap = await getDocs(qRef);
-      const names = [];
-      snap.forEach(d=> names.push(d.data().name));
-      names.sort((a,b)=>a.localeCompare(b,'en')).forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
-      if(names.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد موديلات لهذا البراند —'; sel.appendChild(o); }
-    }
-    $("#brandSelect").addEventListener('change', e=> fillModels(e.target.value));
+   import { categories } from './categories-data.js';
+
+function loadCategories(){
+  const catSel = document.querySelector("#catSelect");
+  const subSel = document.querySelector("#subSelect");
+
+  catSel.innerHTML = "";
+  subSel.innerHTML = "";
+
+  categories.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.name;
+    o.textContent = c.name;
+    catSel.appendChild(o);
+  });
+
+  if (categories.length > 0) {
+    fillSubs(categories[0].name);
+  }
+}
+
+function fillSubs(main){
+  const subSel = document.querySelector("#subSelect");
+  subSel.innerHTML = "";
+
+  const entry = categories.find(c => c.name === main);
+  const subs = entry ? entry.subcategories : [];
+
+  if (subs.length === 0) {
+    const o = document.createElement("option");
+    o.value = "";
+    o.textContent = "— لا يوجد —";
+    subSel.appendChild(o);
+  } else {
+    subs.forEach(s => {
+      const o = document.createElement("option");
+      o.value = s;
+      o.textContent = s;
+      subSel.appendChild(o);
+    });
+  }
+}
+
+document.querySelector("#catSelect").addEventListener("change", (e) => {
+  fillSubs(e.target.value);
+});
 
   // Save product
 $("#saveProduct").addEventListener('click', async ()=>{
@@ -268,5 +294,6 @@ $("#saveProduct").addEventListener('click', async ()=>{
       await loadBrands();
     })().catch(console.error);
   </script>
+  <script src="categories-data.js"></script>
 </body>
 </html>
