@@ -173,30 +173,52 @@
       }
     });
 
-    // Load categories from 'categories_fixed' (docId = main, field 'subs' = array)
-    let catData = [];
-    async function loadCategories(){
-      const snap = await getDocs(query(collection(db,'categories_fixed')));
-      catData = [];
-      snap.forEach(d=>{
-        const subs = Array.isArray(d.data().subs) ? d.data().subs : [];
-        catData.push({ main: d.id, subs });
-      });
-      const catSel = $("#catSelect"), subSel = $("#subSelect");
-      catSel.innerHTML = ""; subSel.innerHTML = "";
-      catData.sort((a,b)=> a.main.localeCompare(b.main,'ar')).forEach(c=>{
-        const o = document.createElement('option'); o.value=c.main; o.textContent=c.main; catSel.appendChild(o);
-      });
-      if(catData.length){ fillSubs(catData[0].main); }
-    }
-    function fillSubs(main){
-      const subSel = $("#subSelect"); subSel.innerHTML = "";
-      const entry = catData.find(c=>c.main===main);
-      const subs = entry ? entry.subs.slice().sort((a,b)=>a.localeCompare(b,'ar')) : [];
-      if(subs.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد —'; subSel.appendChild(o); }
-      else subs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; subSel.appendChild(o); });
-    }
-    $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
+   import { categories } from './categories-data.js';
+
+function loadCategories(){
+  const catSel = document.querySelector("#catSelect");
+  const subSel = document.querySelector("#subSelect");
+
+  catSel.innerHTML = "";
+  subSel.innerHTML = "";
+
+  categories.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.name;
+    o.textContent = c.name;
+    catSel.appendChild(o);
+  });
+
+  if (categories.length > 0) {
+    fillSubs(categories[0].name);
+  }
+}
+
+function fillSubs(main){
+  const subSel = document.querySelector("#subSelect");
+  subSel.innerHTML = "";
+
+  const entry = categories.find(c => c.name === main);
+  const subs = entry ? entry.subcategories : [];
+
+  if (subs.length === 0) {
+    const o = document.createElement("option");
+    o.value = "";
+    o.textContent = "— لا يوجد —";
+    subSel.appendChild(o);
+  } else {
+    subs.forEach(s => {
+      const o = document.createElement("option");
+      o.value = s;
+      o.textContent = s;
+      subSel.appendChild(o);
+    });
+  }
+}
+
+document.querySelector("#catSelect").addEventListener("change", (e) => {
+  fillSubs(e.target.value);
+});
 
    import { categories } from './categories-data.js';
 
