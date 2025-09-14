@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة الإدارة</title>
   <link rel="stylesheet" href="style.css" />
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https: data:;
-             img-src 'self' https: data:;
-             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-             font-src https://fonts.gstatic.com;
-             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
-             connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
   <style>
     body{background:#f6f7f9}
     .admin{max-width:1100px;margin:24px auto;padding:0 16px}
@@ -108,20 +101,17 @@
     </div>
   </div>
 
-  <!-- 🟢 أولا: استيراد التصنيفات -->
+  <!-- تحميل التصنيفات -->
   <script type="module">
     import { categories } from './categories-data.js';
     window.categories = categories;
   </script>
 
-  <!-- 🟢 ثانيا: السكربت الرئيسي -->
+  <!-- سكربت الإدارة -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const categories = window.categories; // ✅ متاحة الآن
-    console.log("✅ تم تحميل التصنيفات:", categories);
+    import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
@@ -131,14 +121,16 @@
       messagingSenderId: "813379257336",
       appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const $ = s=>document.querySelector(s);
+    const $ = s => document.querySelector(s);
     const ok = $("#ok"), err = $("#err"), who = $("#who");
     const loginBtn = $("#login"), logoutBtn = $("#logout");
     const formCard = document.getElementById("card-products");
+    const categories = window.categories;
 
     function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
     function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
@@ -149,7 +141,6 @@
       });
     }
 
-    // Auth
     loginBtn.addEventListener('click', async()=>{
       const email = $("#email").value.trim();
       const password = $("#password").value;
@@ -158,6 +149,7 @@
         showOK("تم تسجيل الدخول");
       }catch(e){ showERR(e); }
     });
+
     logoutBtn.addEventListener('click', async()=>{
       try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
     });
@@ -168,49 +160,44 @@
         who.textContent = `المستخدم: ${name}`;
         loginBtn.style.display = 'none';
         logoutBtn.style.display = '';
-        $("#email").disabled = true; $("#password").disabled = true;
+        $("#email").disabled = true;
+        $("#password").disabled = true;
         setFormEnabled(true);
       }else{
         who.textContent = "";
         loginBtn.style.display = '';
         logoutBtn.style.display = 'none';
-        $("#email").disabled = false; $("#password").disabled = false;
+        $("#email").disabled = false;
+        $("#password").disabled = false;
         setFormEnabled(false);
       }
     });
 
     function loadCategories(){
-      const catSel = document.querySelector("#catSelect");
-      const subSel = document.querySelector("#subSelect");
-
+      const catSel = $("#catSelect");
+      const subSel = $("#subSelect");
       catSel.innerHTML = "";
       subSel.innerHTML = "";
-
       categories.forEach(c => {
         const o = document.createElement("option");
         o.value = c.name;
         o.textContent = c.name;
         catSel.appendChild(o);
       });
-
-      if (categories.length > 0) {
-        fillSubs(categories[0].name);
-      }
+      if(categories.length > 0) fillSubs(categories[0].name);
     }
 
     function fillSubs(main){
-      const subSel = document.querySelector("#subSelect");
+      const subSel = $("#subSelect");
       subSel.innerHTML = "";
-
       const entry = categories.find(c => c.name === main);
       const subs = entry ? entry.subcategories : [];
-
-      if (subs.length === 0) {
+      if(subs.length === 0){
         const o = document.createElement("option");
         o.value = "";
         o.textContent = "— لا يوجد —";
         subSel.appendChild(o);
-      } else {
+      }else{
         subs.forEach(s => {
           const o = document.createElement("option");
           o.value = s;
@@ -220,41 +207,49 @@
       }
     }
 
-    document.querySelector("#catSelect").addEventListener("change", (e) => {
-      fillSubs(e.target.value);
-    });
+    async function loadBrands() {
+      const brandSel = $("#brandSelect");
+      brandSel.innerHTML = "";
+      try {
+        const snap = await getDocs(query(collection(db, "brands"), orderBy("name")));
+        snap.forEach(doc => {
+          const b = doc.data().name;
+          const o = document.createElement("option");
+          o.value = b;
+          o.textContent = b;
+          brandSel.appendChild(o);
+        });
+      } catch (e) {
+        console.error("خطأ في تحميل البراندات:", e);
+      }
+    }
 
-    // Save product
-    $("#saveProduct").addEventListener('click', async ()=>{
-      const cat     = $("#catSelect").value || '';
-      const sub     = $("#subSelect").value || '';
-      const brand   = $("#brandSelect").value || '';
-      const model   = $("#modelSelect").value || '';
-      const sap     = $("#sap").value.trim();
+    $("#catSelect").addEventListener("change", e => fillSubs(e.target.value));
+
+    $("#saveProduct").addEventListener("click", async ()=>{
+      const cat = $("#catSelect").value || '';
+      const sub = $("#subSelect").value || '';
+      const brand = $("#brandSelect").value || '';
+      const model = $("#modelSelect").value || '';
+      const sap = $("#sap").value.trim();
       const factory = $("#factory").value.trim();
-      const imageUrl= $("#imageUrl").value.trim();
-
+      const imageUrl = $("#imageUrl").value.trim();
       if(!cat) return showERR("اختر التصنيف الأساسي");
-
       const path = sub ? `${cat} - ${sub}` : cat;
-
       try{
         const id = `${cat}-${sub || 'general'}-${Date.now()}`;
-
         const payload = {
           cat, sub, path, brand, model,
           sapCode: sap,
           factoryCode: factory,
           imageUrl,
           sap,
-          factory: factory,
+          factory,
           photo: imageUrl,
           createdAt: serverTimestamp()
         };
-
         await setDoc(doc(db,'products', id), payload);
         showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
-
         ["sap","factory","imageUrl"].forEach(k => {
           const el = document.getElementById(k);
           if (el) el.value = "";
@@ -263,7 +258,8 @@
     });
 
     // Init
-    loadCategories(); // ✅ الآن التصنيفات متاحة
+    loadCategories();
+    loadBrands();
   </script>
 </body>
 </html>
