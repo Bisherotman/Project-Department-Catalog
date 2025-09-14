@@ -6,7 +6,7 @@
   <title>لوحة الإدارة</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body{background:#f6f7f9}
+    body { background:#f6f7f9; font-family:'Tajawal',sans-serif; }
     .admin{max-width:1100px;margin:24px auto;padding:0 16px}
     .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -28,41 +28,36 @@
 </head>
 <body>
 
-<!-- ✅ لوحة الإدارة (تُخفى في البداية) -->
+<!-- ✅ نموذج تسجيل الدخول (يظهر فقط عند عدم تسجيل الدخول) -->
+<div id="loginSection" style="max-width: 400px; margin: 3rem auto;">
+  <div class="card">
+    <h2>تسجيل الدخول</h2>
+    <div class="input">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="username" />
+    </div>
+    <div class="input">
+      <label>كلمة المرور</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <div style="margin-top: 1rem; display:flex; gap:10px; align-items:center">
+      <button id="login" class="btn primary">تسجيل الدخول</button>
+    </div>
+    <div id="ok" class="ok"></div>
+    <div id="err" class="err"></div>
+  </div>
+</div>
+
+<!-- ✅ لوحة الإدارة (تُعرض فقط بعد تسجيل الدخول) -->
 <div id="adminPanel" style="display: none;">
-  <h2>مرحبًا بك في لوحة الإدارة</h2>
-  <button id="logoutBtn">تسجيل خروج</button>
-  
   <div class="admin">
     <div class="toolbar">
-      <h2 id="pageTitle" style="margin:0">لوحة الإدارة</h2>
+      <h2 style="margin:0">لوحة الإدارة</h2>
+      <button id="logout" class="btn" style="margin-inline-start:auto">تسجيل الخروج</button>
     </div>
-    <p class="muted">الحسابات تُنشأ وتُدار من قِبل الإدارة فقط.</p>
+    <div id="who" class="muted" style="margin-bottom:10px;"></div>
 
-    <!-- Auth -->
-    <div class="card">
-      <div class="row">
-        <div class="input">
-          <label>البريد الإلكتروني</label>
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="username">
-        </div>
-        <div class="input">
-          <label>كلمة المرور</label>
-          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-        <button id="login" class="btn primary">تسجيل الدخول</button>
-        <button id="logout" class="btn" style="display:none">تسجيل الخروج</button>
-        <div id="who" class="muted" style="margin-inline-start:auto"></div>
-      </div>
-      <div id="ok" class="ok"></div>
-      <div id="err" class="err"></div>
-    </div>
-
-    <div class="spacer"></div>
-
-    <!-- Products -->
+    <!-- ✅ قسم إضافة المنتجات -->
     <div id="card-products" class="card">
       <h3>إضافة منتج</h3>
       <div class="grid-3">
@@ -105,183 +100,170 @@
       </div>
     </div>
   </div>
+</div>
 
- <!-- تحميل التصنيفات والبراندات -->
+<!-- 🔗 تحميل التصنيفات -->
 <script type="module">
   import { categories, brands } from './categories-data.js';
   window.categories = categories;
   window.brands = brands;
 </script>
 
+<!-- 🔐 سكربت الدخول والإدارة -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <!-- سكربت الإدارة -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
+    authDomain: "projects-catalog.firebaseapp.com",
+    projectId: "projects-catalog",
+    storageBucket: "projects-catalog.appspot.com",
+    messagingSenderId: "813379257336",
+    appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-      authDomain: "projects-catalog.firebaseapp.com",
-      projectId: "projects-catalog",
-      storageBucket: "projects-catalog.firebasestorage.app",
-      messagingSenderId: "813379257336",
-      appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-    };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const $ = s => document.querySelector(s);
+  const ok = $("#ok"), err = $("#err"), who = $("#who");
+  const loginBtn = $("#login"), logoutBtn = $("#logout");
+  const formCard = document.getElementById("card-products");
+  const categories = window.categories;
 
-    const $ = s => document.querySelector(s);
-    const ok = $("#ok"), err = $("#err"), who = $("#who");
-    const loginBtn = $("#login"), logoutBtn = $("#logout");
-    const formCard = document.getElementById("card-products");
-    const categories = window.categories;
-
-    function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
-    function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
-    function setFormEnabled(en){
-      formCard.classList.toggle("disabled-mask", !en);
-      [...formCard.querySelectorAll("input,select,button")].forEach(el=>{
-        if(el.id!=='logout') el.disabled=!en;
-      });
-    }
-
-    loginBtn.addEventListener('click', async()=>{
-      const email = $("#email").value.trim();
-      const password = $("#password").value;
-      try{
-        await signInWithEmailAndPassword(auth, email, password);
-        showOK("تم تسجيل الدخول");
-      }catch(e){ showERR(e); }
-    });
-
-    logoutBtn.addEventListener('click', async()=>{
-      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
-    });
-
-    onAuthStateChanged(auth, (user)=>{
-  const loginSection = document.getElementById("loginSection");
-  const adminPanel = document.getElementById("adminPanel");
-
-  if(user){
-    // ✅ تسجيل الدخول
-    const name = user.displayName || user.email || 'مستخدم';
-    who.textContent = `المستخدم: ${name}`;
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display = '';
-    $("#email").disabled = true;
-    $("#password").disabled = true;
-    setFormEnabled(true);
-
-    // 👇 عرض لوحة الإدارة فقط
-    loginSection.style.display = "none";
-    adminPanel.style.display = "block";
-
-  }else{
-    // ❌ لم يتم تسجيل الدخول
-    who.textContent = "";
-    loginBtn.style.display = '';
-    logoutBtn.style.display = 'none';
-    $("#email").disabled = false;
-    $("#password").disabled = false;
-    setFormEnabled(false);
-
-    // 👇 إخفاء لوحة الإدارة وعرض فورمة الدخول فقط
-    loginSection.style.display = "block";
-    adminPanel.style.display = "none";
+  function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
+  function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
+  function setFormEnabled(en){
+    formCard.classList.toggle("disabled-mask", !en);
+    [...formCard.querySelectorAll("input,select,button")].forEach(el=>{ if(el.id!=="logout") el.disabled=!en; });
   }
-});
 
+  loginBtn.addEventListener('click', async()=>{
+    const email = $("#email").value.trim();
+    const password = $("#password").value;
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+      showOK("تم تسجيل الدخول");
+    }catch(e){ showERR(e); }
+  });
 
-    function loadCategories(){
-      const catSel = $("#catSelect");
-      const subSel = $("#subSelect");
-      catSel.innerHTML = "";
-      subSel.innerHTML = "";
-      categories.forEach(c => {
-        const o = document.createElement("option");
-        o.value = c.name;
-        o.textContent = c.name;
-        catSel.appendChild(o);
-      });
-      if(categories.length > 0) fillSubs(categories[0].name);
+  logoutBtn.addEventListener('click', async()=>{
+    try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
+  });
+
+  onAuthStateChanged(auth, (user)=>{
+    const loginSection = document.getElementById("loginSection");
+    const adminPanel = document.getElementById("adminPanel");
+
+    if(user){
+      const name = user.displayName || user.email || 'مستخدم';
+      who.textContent = `المستخدم: ${name}`;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = '';
+      $("#email").disabled = true;
+      $("#password").disabled = true;
+      setFormEnabled(true);
+      loginSection.style.display = "none";
+      adminPanel.style.display = "block";
+    } else {
+      who.textContent = "";
+      loginBtn.style.display = '';
+      logoutBtn.style.display = 'none';
+      $("#email").disabled = false;
+      $("#password").disabled = false;
+      setFormEnabled(false);
+      loginSection.style.display = "block";
+      adminPanel.style.display = "none";
     }
+  });
 
-    function fillSubs(main){
-      const subSel = $("#subSelect");
-      subSel.innerHTML = "";
-      const entry = categories.find(c => c.name === main);
-      const subs = entry ? entry.subcategories : [];
-      if(subs.length === 0){
-        const o = document.createElement("option");
-        o.value = "";
-        o.textContent = "— لا يوجد —";
-        subSel.appendChild(o);
-      }else{
-        subs.forEach(s => {
-          const o = document.createElement("option");
-          o.value = s;
-          o.textContent = s;
-          subSel.appendChild(o);
-        });
-      }
-    }
-
-    async function loadBrands() {
-      const brandSel = $("#brandSelect");
-      brandSel.innerHTML = "";
-      try {
-        const snap = await getDocs(query(collection(db, "brands"), orderBy("name")));
-        snap.forEach(doc => {
-          const b = doc.data().name;
-          const o = document.createElement("option");
-          o.value = b;
-          o.textContent = b;
-          brandSel.appendChild(o);
-        });
-      } catch (e) {
-        console.error("خطأ في تحميل البراندات:", e);
-      }
-    }
-
-    $("#catSelect").addEventListener("change", e => fillSubs(e.target.value));
-
-    $("#saveProduct").addEventListener("click", async ()=>{
-      const cat = $("#catSelect").value || '';
-      const sub = $("#subSelect").value || '';
-      const brand = $("#brandSelect").value || '';
-      const model = $("#modelSelect").value || '';
-      const sap = $("#sap").value.trim();
-      const factory = $("#factory").value.trim();
-      const imageUrl = $("#imageUrl").value.trim();
-      if(!cat) return showERR("اختر التصنيف الأساسي");
-      const path = sub ? `${cat} - ${sub}` : cat;
-      try{
-        const id = `${cat}-${sub || 'general'}-${Date.now()}`;
-        const payload = {
-          cat, sub, path, brand, model,
-          sapCode: sap,
-          factoryCode: factory,
-          imageUrl,
-          sap,
-          factory,
-          photo: imageUrl,
-          createdAt: serverTimestamp()
-        };
-        await setDoc(doc(db,'products', id), payload);
-        showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
-        ["sap","factory","imageUrl"].forEach(k => {
-          const el = document.getElementById(k);
-          if (el) el.value = "";
-        });
-      }catch(e){ showERR(e); }
+  function loadCategories(){
+    const catSel = $("#catSelect");
+    const subSel = $("#subSelect");
+    catSel.innerHTML = "";
+    subSel.innerHTML = "";
+    categories.forEach(c => {
+      const o = document.createElement("option");
+      o.value = c.name;
+      o.textContent = c.name;
+      catSel.appendChild(o);
     });
+    if(categories.length > 0) fillSubs(categories[0].name);
+  }
 
-    // Init
-    loadCategories();
-    loadBrands();
-  </script>
+  function fillSubs(main){
+    const subSel = $("#subSelect");
+    subSel.innerHTML = "";
+    const entry = categories.find(c => c.name === main);
+    const subs = entry ? entry.subcategories : [];
+    if(subs.length === 0){
+      const o = document.createElement("option");
+      o.value = "";
+      o.textContent = "— لا يوجد —";
+      subSel.appendChild(o);
+    } else {
+      subs.forEach(s => {
+        const o = document.createElement("option");
+        o.value = s;
+        o.textContent = s;
+        subSel.appendChild(o);
+      });
+    }
+  }
+
+  async function loadBrands() {
+    const brandSel = $("#brandSelect");
+    brandSel.innerHTML = "";
+    try {
+      const snap = await getDocs(query(collection(db, "brands"), orderBy("name")));
+      snap.forEach(doc => {
+        const b = doc.data().name;
+        const o = document.createElement("option");
+        o.value = b;
+        o.textContent = b;
+        brandSel.appendChild(o);
+      });
+    } catch (e) {
+      console.error("خطأ في تحميل البراندات:", e);
+    }
+  }
+
+  $("#catSelect").addEventListener("change", e => fillSubs(e.target.value));
+
+  $("#saveProduct").addEventListener("click", async ()=>{
+    const cat = $("#catSelect").value || '';
+    const sub = $("#subSelect").value || '';
+    const brand = $("#brandSelect").value || '';
+    const model = $("#modelSelect").value || '';
+    const sap = $("#sap").value.trim();
+    const factory = $("#factory").value.trim();
+    const imageUrl = $("#imageUrl").value.trim();
+    if(!cat) return showERR("اختر التصنيف الأساسي");
+    const path = sub ? `${cat} - ${sub}` : cat;
+    try{
+      const id = `${cat}-${sub || 'general'}-${Date.now()}`;
+      const payload = {
+        cat, sub, path, brand, model,
+        sapCode: sap,
+        factoryCode: factory,
+        imageUrl,
+        photo: imageUrl,
+        createdAt: serverTimestamp()
+      };
+      await setDoc(doc(db,'products', id), payload);
+      showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
+      ["sap","factory","imageUrl"].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = "";
+      });
+    }catch(e){ showERR(e); }
+  });
+
+  loadCategories();
+  loadBrands();
+</script>
 </body>
 </html>
