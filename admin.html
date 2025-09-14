@@ -1,197 +1,110 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>لوحة إدارة الكتالوج (Email/Password)</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- CSP ملائمة لـ Firebase -->
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https: data:;
-             img-src 'self' https: data:;
-             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-             font-src https://fonts.gstatic.com;
-             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
-             connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body{background:#f6f7f9}
-    .admin{max-width:900px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:720px){.row{grid-template-columns:1fr}}
-    .input{display:grid;gap:6px}
-    .input input,.input select,.input textarea{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
-    .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
-    .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
-    .muted{color:#616a77;font-size:13px}
-    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
-    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
-    .disabled-mask{opacity:.5;pointer-events:none}
-  </style>
-</head>
-<body>
-  <div class="admin">
-    <h2>لوحة الإدارة (Email/Password)</h2>
-    <p class="muted">سجّل الدخول ببريد وكلمة مرور تم إنشاؤهما في Firebase Console (Authentication → Users).</p>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>لوحة الإدارة (بدون Storage)</title>
+<link rel="stylesheet" href="style.css"/>
+<meta http-equiv="Content-Security-Policy"
+content="default-src 'self' https: data:; img-src 'self' https: data:;
+         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+         font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
+         connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
+<style>
+  body{background:#f6f7f9}.admin{max-width:900px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:720px){.row{grid-template-columns:1fr}}
+  .input{display:grid;gap:6px}.input input{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
+  .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
+  .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
+  .muted{color:#616a77;font-size:13px}.err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+  .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+  .disabled-mask{opacity:.5;pointer-events:none}
+</style></head><body>
+<div class="admin">
+  <h2>لوحة الإدارة (Email/Password • بدون رفع صور)</h2>
+  <p class="muted">سجّل الدخول ببريد/كلمة مرور من Firebase (Users → Add user). الصوره تكون كرابط (من GitHub Pages أو أي استضافة).</p>
 
-    <!-- Auth -->
-    <div class="card">
-      <h3>تسجيل الدخول</h3>
-      <div class="row">
-        <div class="input">
-          <label>البريد الإلكتروني</label>
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="username">
-        </div>
-        <div class="input">
-          <label>كلمة المرور</label>
-          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-        <button id="login" class="btn primary">تسجيل الدخول</button>
-        <button id="logout" class="btn">تسجيل الخروج</button>
-        <button id="reset" class="btn">إرسال رابط استعادة</button>
-        <div id="uid" class="muted"></div>
-      </div>
-      <div id="ok" class="ok"></div>
-      <div id="err" class="err"></div>
-      <p class="muted" style="margin-top:8px">
-        <strong>ملاحظة:</strong> إضافة المستخدمين تتم من لوحة Firebase (Users → Add user). لاحقًا ممكن نضيف فورم “إنشاء مستخدم” من هنا للمدراء فقط.
-      </p>
+  <div class="card">
+    <h3>تسجيل الدخول</h3>
+    <div class="row">
+      <div class="input"><label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="you@example.com"></div>
+      <div class="input"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     </div>
-
-    <!-- Products -->
-    <div id="card-products" class="card" style="margin-top:16px">
-      <h3>إضافة منتج</h3>
-      <div class="row">
-        <div class="input">
-          <label>التصنيف (مثال: WC)</label>
-          <input id="cat" placeholder="WC / Bidet / ...">
-        </div>
-        <div class="input">
-          <label>التصنيف الفرعي (مثال: Wall-Hung)</label>
-          <input id="sub" placeholder="Wall-Hung / Floor-Standing / ...">
-        </div>
-      </div>
-      <div class="row">
-        <div class="input">
-          <label>البراند</label>
-          <input id="brand" placeholder="Brand">
-        </div>
-        <div class="input">
-          <label>الموديل</label>
-          <input id="model" placeholder="Model">
-        </div>
-      </div>
-      <div class="row">
-        <div class="input">
-          <label>SAP Code</label>
-          <input id="sap" placeholder="SAP code">
-        </div>
-        <div class="input">
-          <label>Factory Code</label>
-          <input id="factory" placeholder="Factory code">
-        </div>
-      </div>
-      <div class="input">
-        <label>صورة المنتج</label>
-        <input id="img" type="file" accept="image/*">
-      </div>
-      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-        <button id="save" class="btn primary">حفظ المنتج</button>
-        <span id="msg" class="muted"></span>
-      </div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+      <button id="login" class="btn primary">تسجيل الدخول</button>
+      <button id="logout" class="btn">تسجيل الخروج</button>
+      <button id="reset" class="btn">إرسال رابط استعادة</button>
+      <div id="uid" class="muted"></div>
     </div>
+    <div id="ok" class="ok"></div><div id="err" class="err"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  <div id="card-products" class="card" style="margin-top:16px">
+    <h3>إضافة منتج</h3>
+    <div class="row">
+      <div class="input"><label>التصنيف (WC/Bidet/...)</label><input id="cat" placeholder="WC"></div>
+      <div class="input"><label>التصنيف الفرعي</label><input id="sub" placeholder="Wall-Hung / Floor-Standing"></div>
+    </div>
+    <div class="row">
+      <div class="input"><label>البراند</label><input id="brand" placeholder="Brand"></div>
+      <div class="input"><label>الموديل</label><input id="model" placeholder="Model"></div>
+    </div>
+    <div class="row">
+      <div class="input"><label>SAP Code</label><input id="sap" placeholder="SAP code"></div>
+      <div class="input"><label>Factory Code</label><input id="factory" placeholder="Factory code"></div>
+    </div>
+    <div class="input"><label>رابط الصورة (مثال: assets/products/WC/model-123.png)</label>
+      <input id="imageUrl" placeholder="ضع رابط الصورة هنا"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+      <button id="save" class="btn primary">حفظ المنتج</button><span id="msg" class="muted"></span>
+    </div>
+  </div>
+</div>
 
-    // ضع إعدادات مشروعك هنا (انسخه كما هو من Project settings → Web app → Config)
-    const firebaseConfig = {
-  apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-  authDomain: "projects-catalog.firebaseapp.com",
-  projectId: "projects-catalog",
-  storageBucket: "projects-catalog.firebasestorage.app",
-  messagingSenderId: "813379257336",
-  appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-};
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  // ضع إعدادات مشروعك هنا
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "",
+    appId: ""
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const $ = (s)=>document.querySelector(s);
-    const ok = $("#ok"), err = $("#err"), uidEl = $("#uid");
-    const formCard = document.getElementById("card-products");
+  const $ = s=>document.querySelector(s);
+  const ok=$("#ok"), err=$("#err"), uid=$("#uid"); const form=document.getElementById("card-products");
+  function showOK(t){ok.textContent=t;ok.style.display="block";err.style.display="none"}
+  function showERR(e){console.error(e);err.textContent=(e&&e.message)?e.message:String(e);err.style.display="block";ok.style.display="none"}
+  function setFormEnabled(en){form.classList.toggle("disabled-mask",!en);[...form.querySelectorAll("input,button")].forEach(el=>el.disabled=!en)}
 
-    function showOK(t){ ok.textContent = t; ok.style.display = "block"; err.style.display = "none"; }
-    function showERR(e){ console.error(e); err.textContent = (e && e.message) ? e.message : String(e); err.style.display = "block"; ok.style.display = "none"; }
-    function setFormEnabled(enabled){
-      formCard.classList.toggle("disabled-mask", !enabled);
-      [...formCard.querySelectorAll("input,button")].forEach(el=> el.disabled = !enabled && el.id !== "img");
-    }
+  document.getElementById("login").onclick=async()=>{const email=$("#email").value.trim();const password=$("#password").value;
+    try{await signInWithEmailAndPassword(auth,email,password);showOK("تم تسجيل الدخول")}catch(e){showERR(e)}};
+  document.getElementById("logout").onclick=async()=>{try{await signOut(auth);showOK("تم تسجيل الخروج")}catch(e){showERR(e)}};
+  document.getElementById("reset").onclick=async()=>{const email=$("#email").value.trim();if(!email)return showERR("أدخل البريد أولاً");
+    try{await sendPasswordResetEmail(auth,email);showOK("تم إرسال رابط الاستعادة")}catch(e){showERR(e)}};
 
-    // Auth
-    document.getElementById("login").addEventListener("click", async()=>{
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      try{
-        await signInWithEmailAndPassword(auth, email, password);
-        showOK("تم تسجيل الدخول");
-      }catch(e){ showERR(e); }
-    });
-    document.getElementById("logout").addEventListener("click", async()=>{
-      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
-    });
-    document.getElementById("reset").addEventListener("click", async()=>{
-      const email = document.getElementById("email").value.trim();
-      if(!email) return showERR("أدخل البريد أولاً");
-      try{ await sendPasswordResetEmail(auth, email); showOK("تم إرسال رابط الاستعادة إلى بريدك"); }catch(e){ showERR(e); }
-    });
+  onAuthStateChanged(auth,(user)=>{ if(user){uid.textContent=`UID: ${user.uid}`;setFormEnabled(true)} else {uid.textContent="غير مسجل الدخول";setFormEnabled(false)} });
 
-    onAuthStateChanged(auth, (user)=>{
-      if(user){ uidEl.textContent = `UID: ${user.uid}`; setFormEnabled(true); }
-      else { uidEl.textContent = "غير مسجل الدخول"; setFormEnabled(false); }
-    });
+  document.getElementById("save").onclick=async()=>{
+    const cat=$("#cat").value.trim(), sub=$("#sub").value.trim();
+    const brand=$("#brand").value.trim(), model=$("#model").value.trim();
+    const sap=$("#sap").value.trim(), factory=$("#factory").value.trim();
+    const imageUrl=$("#imageUrl").value.trim(); // رابط الصورة جاهز
+    if(!cat||!sub) return showERR("رجاءً أدخل التصنيف والتصنيف الفرعي");
 
-    // Save product
-    document.getElementById("save").addEventListener("click", async()=>{
-      const cat = $("#cat").value.trim();
-      const sub = $("#sub").value.trim();
-      const brand = $("#brand").value.trim();
-      const model = $("#model").value.trim();
-      const sap = $("#sap").value.trim();
-      const factory = $("#factory").value.trim();
-      const file = $("#img").files?.[0] || null;
-
-      if(!cat || !sub) return showERR("رجاءً أدخل التصنيف والتصنيف الفرعي");
-
-      let imageUrl = "";
-      try{
-        if(file){
-          const r = ref(storage, `products/${cat}/${Date.now()}_${file.name}`);
-          await uploadBytes(r, file);
-          imageUrl = await getDownloadURL(r);
-        }
-        const id = `${cat}-${sub}-${Date.now()}`;
-        const payload = {
-          cat, sub, path: `${cat} - ${sub}`,
-          brand, model, sapCode: sap, factoryCode: factory,
-          imageUrl, createdAt: serverTimestamp()
-        };
-        await setDoc(doc(db, "products", id), payload);
-        showOK("✔ تم الحفظ وظهر المنتج في الصفحة الفرعية مباشرة");
-        ["brand","model","sap","factory","img"].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ""; });
-      }catch(e){ showERR(e); }
-    });
-  </script>
-</body>
-</html>
+    try{
+      const id=`${cat}-${sub}-${Date.now()}`;
+      const payload={cat,sub,path:`${cat} - ${sub}`,brand,model,sapCode:sap,factoryCode:factory,imageUrl,createdAt:serverTimestamp()};
+      await setDoc(doc(db,"products",id),payload);
+      showOK("✔ تم الحفظ وظهر المنتج مباشرة");
+      ["brand","model","sap","factory","imageUrl"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});
+    }catch(e){showERR(e)}
+  };
+</script>
+</body></html>
