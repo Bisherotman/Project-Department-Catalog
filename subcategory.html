@@ -212,62 +212,7 @@
     <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
 </button>
-// subcategory.js — drop-in Firestore loader
-// Usage: include at the bottom of subcategory.html
-// <script type="module" src="subcategory.js"></script>
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {'apiKey': 'AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU', 'authDomain': 'projects-catalog.firebaseapp.com', 'projectId': 'projects-catalog', 'storageBucket': 'projects-catalog.firebasestorage.app', 'messagingSenderId': '813379257336', 'appId': '1:813379257336:web:b2372449cbe46e15c20c0d'};
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-// Helpers to find elements if they exist
-const $ = (s)=>document.querySelector(s);
-const params = new URLSearchParams(location.search);
-const title = decodeURIComponent(params.get('title') || '').trim();
-const [cat, sub] = title.split(' - ').map(s=> (s||'').trim());
-const heading = $('#subcategory-title') || $('h1, h2, .page-title');
-if (heading && title) heading.textContent = title;
-
-// Containers that may exist in the current theme:
-const grid   = $('#productsGrid') || $('#cards') || $('#products-list') || $('#products') || document.querySelector('[data-products]') || (()=>{ const d=document.createElement('div'); d.id='productsGrid'; document.body.appendChild(d); return d; })();
-const badge  = $('#productsCount') || document.querySelector('.tab-badge, .count, [data-count]');
-
-function cardHTML(item) {
-  const img = item.imageUrl || item.photo || '';
-  const brand = item.brand || '';
-  const model = item.model || '';
-  const sap = item.sapCode || item.sap || '';
-  const factory = item.factoryCode || item.factory || '';
-  return `
-  <article class="product-card" style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;display:grid;grid-template-columns:120px 1fr;gap:12px;background:#fff">
-    <div style="background:#f8fafc;border:1px solid #eef2f7;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-      ${img ? `<img src="\${img}" alt="" style="max-width:100%;max-height:120px;display:block">` : `<div style="height:120px"></div>`}
-    </div>
-    <div style="display:grid;gap:4px">
-      <div style="font-weight:700">${brand || '—'} ${model ? ('· ' + model) : ''}</div>
-      <div style="font-size:13px;color:#475569">SAP: ${sap || '—'}</div>
-      <div style="font-size:13px;color:#475569">Factory: ${factory || '—'}</div>
-    </div>
-  </article>`;
-}
-
-async function load() {
-  if (!title) return;
-  // Query products by exact path
-  const q = query(collection(db,'products'), where('path','==', title));
-  const snap = await getDocs(q);
-  const items = [];
-  snap.forEach(d=> items.push({ id:d.id, ...d.data() }));
-  // Render
-  if (badge) badge.textContent = items.length;
-  if (grid) {
-    grid.innerHTML = items.map(cardHTML).join('');
-  }
-}
-load().catch(console.error);
+  
 <script type="module" src="subcategory.js"></script>
 </body>
 </html>
