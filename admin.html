@@ -3,17 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>لوحة إدارة الكتالوج</title>
+  <title>لوحة إدارة الكتالوج (Email/Password)</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- ✅ CSP موسّعة لتعمل مع Firebase Auth/Firestore/Storage على GitHub Pages -->
+  <!-- CSP ملائمة لـ Firebase -->
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self' https: data:;
              img-src 'self' https: data:;
              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
              font-src https://fonts.gstatic.com;
-             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://accounts.google.com;
-             connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://apis.google.com https://accounts.google.com;
-             frame-src https://apis.google.com https://accounts.google.com;">
+             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
+             connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
@@ -28,22 +27,44 @@
     .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
     .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
     .muted{color:#616a77;font-size:13px}
-    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none}
+    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+    .disabled-mask{opacity:.5;pointer-events:none}
   </style>
 </head>
 <body>
   <div class="admin">
-    <h2>لوحة الإدارة</h2>
-    <p class="muted">سجّل دخولك بحساب Google المصرّح لإضافة المنتجات.</p>
+    <h2>لوحة الإدارة (Email/Password)</h2>
+    <p class="muted">سجّل الدخول ببريد وكلمة مرور تم إنشاؤهما في Firebase Console (Authentication → Users).</p>
 
-    <div style="display:flex; gap:8px; margin:12px 0; align-items:center;">
-      <button id="login" class="btn primary">تسجيل الدخول (Google)</button>
-      <button id="logout" class="btn">تسجيل الخروج</button>
-      <div id="uid" class="muted"></div>
+    <!-- Auth -->
+    <div class="card">
+      <h3>تسجيل الدخول</h3>
+      <div class="row">
+        <div class="input">
+          <label>البريد الإلكتروني</label>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="username">
+        </div>
+        <div class="input">
+          <label>كلمة المرور</label>
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+        <button id="login" class="btn primary">تسجيل الدخول</button>
+        <button id="logout" class="btn">تسجيل الخروج</button>
+        <button id="reset" class="btn">إرسال رابط استعادة</button>
+        <div id="uid" class="muted"></div>
+      </div>
+      <div id="ok" class="ok"></div>
+      <div id="err" class="err"></div>
+      <p class="muted" style="margin-top:8px">
+        <strong>ملاحظة:</strong> إضافة المستخدمين تتم من لوحة Firebase (Users → Add user). لاحقًا ممكن نضيف فورم “إنشاء مستخدم” من هنا للمدراء فقط.
+      </p>
     </div>
-    <div id="err" class="err"></div>
 
-    <div class="card" style="margin-top:16px">
+    <!-- Products -->
+    <div id="card-products" class="card" style="margin-top:16px">
       <h3>إضافة منتج</h3>
       <div class="row">
         <div class="input">
@@ -88,11 +109,11 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // ⚠️ ضع إعدادات مشروعك هنا
+    // ضع إعدادات مشروعك هنا (انسخه كما هو من Project settings → Web app → Config)
     const firebaseConfig = {
   apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
   authDomain: "projects-catalog.firebaseapp.com",
@@ -101,47 +122,48 @@
   messagingSenderId: "813379257336",
   appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
 };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const provider = new GoogleAuthProvider();
     const $ = (s)=>document.querySelector(s);
-    const errBox = $("#err");
+    const ok = $("#ok"), err = $("#err"), uidEl = $("#uid");
+    const formCard = document.getElementById("card-products");
 
-    function showErr(e){
-      console.error(e);
-      errBox.textContent = (e && e.message) ? e.message : String(e);
-      errBox.style.display = "block";
-      alert("Firebase: " + errBox.textContent);
+    function showOK(t){ ok.textContent = t; ok.style.display = "block"; err.style.display = "none"; }
+    function showERR(e){ console.error(e); err.textContent = (e && e.message) ? e.message : String(e); err.style.display = "block"; ok.style.display = "none"; }
+    function setFormEnabled(enabled){
+      formCard.classList.toggle("disabled-mask", !enabled);
+      [...formCard.querySelectorAll("input,button")].forEach(el=> el.disabled = !enabled && el.id !== "img");
     }
 
-    // Handle redirect result (if popup fails we fallback)
-    getRedirectResult(auth).catch(showErr);
-
-    $("#login").addEventListener("click", async()=>{
-      errBox.style.display = "none";
+    // Auth
+    document.getElementById("login").addEventListener("click", async()=>{
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
       try{
-        await signInWithPopup(auth, provider);
-      }catch(e){
-        // Popup blocked or cookies issue → try redirect
-        try{
-          await signInWithRedirect(auth, provider);
-        }catch(e2){
-          showErr(e2);
-        }
-      }
+        await signInWithEmailAndPassword(auth, email, password);
+        showOK("تم تسجيل الدخول");
+      }catch(e){ showERR(e); }
     });
-    $("#logout").addEventListener("click", async()=>{
-      try{ await signOut(auth); }catch(e){ showErr(e); }
+    document.getElementById("logout").addEventListener("click", async()=>{
+      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
+    });
+    document.getElementById("reset").addEventListener("click", async()=>{
+      const email = document.getElementById("email").value.trim();
+      if(!email) return showERR("أدخل البريد أولاً");
+      try{ await sendPasswordResetEmail(auth, email); showOK("تم إرسال رابط الاستعادة إلى بريدك"); }catch(e){ showERR(e); }
     });
 
     onAuthStateChanged(auth, (user)=>{
-      $("#uid").textContent = user ? `UID: ${user.uid}` : "غير مسجل الدخول";
+      if(user){ uidEl.textContent = `UID: ${user.uid}`; setFormEnabled(true); }
+      else { uidEl.textContent = "غير مسجل الدخول"; setFormEnabled(false); }
     });
 
-    $("#save").addEventListener("click", async()=>{
+    // Save product
+    document.getElementById("save").addEventListener("click", async()=>{
       const cat = $("#cat").value.trim();
       const sub = $("#sub").value.trim();
       const brand = $("#brand").value.trim();
@@ -150,7 +172,7 @@
       const factory = $("#factory").value.trim();
       const file = $("#img").files?.[0] || null;
 
-      if(!cat || !sub){ alert("رجاءً أدخل التصنيف والتصنيف الفرعي"); return; }
+      if(!cat || !sub) return showERR("رجاءً أدخل التصنيف والتصنيف الفرعي");
 
       let imageUrl = "";
       try{
@@ -166,11 +188,9 @@
           imageUrl, createdAt: serverTimestamp()
         };
         await setDoc(doc(db, "products", id), payload);
-        $("#msg").textContent = "✔ تم الحفظ وظهر المنتج في الصفحة الفرعية مباشرة";
+        showOK("✔ تم الحفظ وظهر المنتج في الصفحة الفرعية مباشرة");
         ["brand","model","sap","factory","img"].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ""; });
-      }catch(err){
-        showErr(err);
-      }
+      }catch(e){ showERR(e); }
     });
   </script>
 </body>
