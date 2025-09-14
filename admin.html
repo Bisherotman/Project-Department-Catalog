@@ -108,12 +108,21 @@
     </div>
   </div>
 
+  <!-- 🟢 أولا: استيراد التصنيفات -->
+  <script type="module">
+    import { categories } from './categories-data.js';
+    window.categories = categories;
+  </script>
+
+  <!-- 🟢 ثانيا: السكربت الرئيسي -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ✅ config (أُزيل التكرار الذي كان يسبب كسر السكربت)
+    const categories = window.categories; // ✅ متاحة الآن
+    console.log("✅ تم تحميل التصنيفات:", categories);
+
     const firebaseConfig = {
       apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
       authDomain: "projects-catalog.firebaseapp.com",
@@ -125,9 +134,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    // Title = tab title
-    document.title = document.getElementById('pageTitle').textContent;
 
     const $ = s=>document.querySelector(s);
     const ok = $("#ok"), err = $("#err"), who = $("#who");
@@ -172,105 +178,92 @@
         setFormEnabled(false);
       }
     });
-  
-function loadCategories(){
-  const catSel = document.querySelector("#catSelect");
-  const subSel = document.querySelector("#subSelect");
 
-  catSel.innerHTML = "";
-  subSel.innerHTML = "";
+    function loadCategories(){
+      const catSel = document.querySelector("#catSelect");
+      const subSel = document.querySelector("#subSelect");
 
-  categories.forEach(c => {
-    const o = document.createElement("option");
-    o.value = c.name;
-    o.textContent = c.name;
-    catSel.appendChild(o);
-  });
+      catSel.innerHTML = "";
+      subSel.innerHTML = "";
 
-  if (categories.length > 0) {
-    fillSubs(categories[0].name);
-  }
-}
+      categories.forEach(c => {
+        const o = document.createElement("option");
+        o.value = c.name;
+        o.textContent = c.name;
+        catSel.appendChild(o);
+      });
 
-function fillSubs(main){
-  const subSel = document.querySelector("#subSelect");
-  subSel.innerHTML = "";
+      if (categories.length > 0) {
+        fillSubs(categories[0].name);
+      }
+    }
 
-  const entry = categories.find(c => c.name === main);
-  const subs = entry ? entry.subcategories : [];
+    function fillSubs(main){
+      const subSel = document.querySelector("#subSelect");
+      subSel.innerHTML = "";
 
-  if (subs.length === 0) {
-    const o = document.createElement("option");
-    o.value = "";
-    o.textContent = "— لا يوجد —";
-    subSel.appendChild(o);
-  } else {
-    subs.forEach(s => {
-      const o = document.createElement("option");
-      o.value = s;
-      o.textContent = s;
-      subSel.appendChild(o);
+      const entry = categories.find(c => c.name === main);
+      const subs = entry ? entry.subcategories : [];
+
+      if (subs.length === 0) {
+        const o = document.createElement("option");
+        o.value = "";
+        o.textContent = "— لا يوجد —";
+        subSel.appendChild(o);
+      } else {
+        subs.forEach(s => {
+          const o = document.createElement("option");
+          o.value = s;
+          o.textContent = s;
+          subSel.appendChild(o);
+        });
+      }
+    }
+
+    document.querySelector("#catSelect").addEventListener("change", (e) => {
+      fillSubs(e.target.value);
     });
-  }
-}
 
-document.querySelector("#catSelect").addEventListener("change", (e) => {
-  fillSubs(e.target.value);
-});
+    // Save product
+    $("#saveProduct").addEventListener('click', async ()=>{
+      const cat     = $("#catSelect").value || '';
+      const sub     = $("#subSelect").value || '';
+      const brand   = $("#brandSelect").value || '';
+      const model   = $("#modelSelect").value || '';
+      const sap     = $("#sap").value.trim();
+      const factory = $("#factory").value.trim();
+      const imageUrl= $("#imageUrl").value.trim();
 
-  // Save product
-$("#saveProduct").addEventListener('click', async ()=>{
-  const cat     = $("#catSelect").value || '';
-  const sub     = $("#subSelect").value || '';
-  const brand   = $("#brandSelect").value || '';
-  const model   = $("#modelSelect").value || '';
-  const sap     = $("#sap").value.trim();
-  const factory = $("#factory").value.trim();
-  const imageUrl= $("#imageUrl").value.trim();
+      if(!cat) return showERR("اختر التصنيف الأساسي");
 
-  if(!cat) return showERR("اختر التصنيف الأساسي");
+      const path = sub ? `${cat} - ${sub}` : cat;
 
-  const path = sub ? `${cat} - ${sub}` : cat;
+      try{
+        const id = `${cat}-${sub || 'general'}-${Date.now()}`;
 
-  try{
-    const id = `${cat}-${sub || 'general'}-${Date.now()}`;
+        const payload = {
+          cat, sub, path, brand, model,
+          sapCode: sap,
+          factoryCode: factory,
+          imageUrl,
+          sap,
+          factory: factory,
+          photo: imageUrl,
+          createdAt: serverTimestamp()
+        };
 
-    const payload = {
-      // الحقول الجديدة
-      cat, sub, path, brand, model,
-      sapCode: sap,
-      factoryCode: factory,
-      imageUrl,
+        await setDoc(doc(db,'products', id), payload);
+        showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
 
-      // حقول التوافق مع الواجهة الحالية
-      sap,                 // نفس sapCode
-      factory: factory,    // نفس factoryCode
-      photo: imageUrl,     // نفس imageUrl
-
-      createdAt: serverTimestamp()
-    };
-
-    await setDoc(doc(db,'products', id), payload);
-    showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
-
-    ["sap","factory","imageUrl"].forEach(k => {
-      const el = document.getElementById(k);
-      if (el) el.value = "";
+        ["sap","factory","imageUrl"].forEach(k => {
+          const el = document.getElementById(k);
+          if (el) el.value = "";
+        });
+      }catch(e){ showERR(e); }
     });
-  }catch(e){ showERR(e); }
-});
-
 
     // Init
-    (async()=>{
-      await loadCategories();
-    })().catch(console.error);
+    loadCategories(); // ✅ الآن التصنيفات متاحة
   </script>
-
-  <script type="module">
-  import { categories } from './categories-data.js';
-  window.categories = categories;
-</script>
-
 </body>
 </html>
