@@ -148,3 +148,19 @@ datalist option {
 #logout-btn:hover {
   background-color: #6c1d2c; /* نفس اللون ما يتغير */
 }
+
+.logout-small {
+  background: none;
+  border: none;
+  color: #6c1d2c; /* اللون الخمري */
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: 0.3s;
+}
+
+.logout-small:hover {
+  color: #a52840; /* لون أفتح عند التمرير */
+  text-decoration: underline;
+}
