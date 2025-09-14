@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Catalogue</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png?v=4">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Drawer trigger -->
+<button class="side-open" id="openDrawer" aria-label="Open menu" aria-expanded="false">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <span>Menu</span>
+</button>
+<div class="backdrop" id="backdrop" hidden></div>
+
+<!-- Drawer (كل البيانات موجودة) -->
+<aside class="sidebar-drawer" role="dialog" aria-modal="true" aria-label="Catalogue navigation" id="drawer" aria-hidden="true">
+  <div class="inner">
+    <div class="side-group">
+      <button type="button">WC</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=WC%20-%20Floor-Standing">Floor-Standing</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Close-coupled">Close-coupled</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Wall-Hung">Wall-Hung</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Concealed%20tank">Concealed tank</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Flush%20valve%20%28Ex.%29">Flush valve (Ex.)</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Seats%20%26%20covers">Seats &amp; covers</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Eastern">Eastern</a></li>
+        <li><a href="subcategory.html?title=WC%20-%20Handicapped">Handicapped</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Bidet</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Bidet%20-%20Floor-Standing">Floor-Standing</a></li>
+        <li><a href="subcategory.html?title=Bidet%20-%20Wall-hung">Wall-hung</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Urinal</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Urinal%20-%20Top%20inlet">Top inlet</a></li>
+        <li><a href="subcategory.html?title=Urinal%20-%20Rear%20inlet">Rear inlet</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Wash Basins</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Wall-mount%20%26%20Pedestals">Wall-mount &amp; Pedestals</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20One%20piece">One piece</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Floor-standing">Floor-standing</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Over%20counter">Over counter</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Under%20counter">Under counter</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Top%20counter">Top counter</a></li>
+        <li><a href="subcategory.html?title=Wash%20Basins%20-%20Cabinet">Cabinet</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Showers and Bathtubs</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Free-standing">Free-standing</a></li>
+        <li><a href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Drop-in">Drop-in</a></li>
+        <li><a href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Hydromassage">Hydromassage</a></li>
+        <li><a href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Shower%20tray">Shower tray</a></li>
+        <li><a href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Shower%20cabinet">Shower cabinet</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Faucets</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Faucets%20-%20Basin%20Mixers">Basin Mixers</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Bath%20%26%20Shower%20Mixers">Bath &amp; Shower Mixers</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Shower%20systems">Shower systems</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Shower%20Jets">Shower Jets</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Kitchen%20Mixers">Kitchen Mixers</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Bidet%20Mixers">Bidet Mixers</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Ablution%20Mixers">Ablution Mixers</a></li>
+        <li><a href="subcategory.html?title=Faucets%20-%20Taps">Taps</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Fittings</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Fittings%20-%20Angle%20Valves">Angle Valves</a></li>
+        <li><a href="subcategory.html?title=Fittings%20-%20Showers">Showers</a></li>
+        <li><a href="subcategory.html?title=Fittings%20-%20Flexible%20hoses">Flexible hoses</a></li>
+        <li><a href="subcategory.html?title=Fittings%20-%20Traps">Traps</a></li>
+        <li><a href="subcategory.html?title=Fittings%20-%20Strainers">Strainers</a></li>
+        <li><a href="subcategory.html?title=Fittings%20-%20Pop-ups">Pop-ups</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Sinks</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Sinks%20-%20Stainless%20steel%20bowls">Stainless steel bowls</a></li>
+        <li><a href="subcategory.html?title=Sinks%20-%20Cast%20iron%20bowls">Cast iron bowls</a></li>
+        <li><a href="subcategory.html?title=Sinks%20-%20Vitreous%20China">Vitreous China</a></li>
+        <li><a href="subcategory.html?title=Sinks%20-%20Service">Service</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Drains</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Drains%20-%20Floor%20drains">Floor drains</a></li>
+        <li><a href="subcategory.html?title=Drains%20-%20Clean-outs">Clean-outs</a></li>
+        <li><a href="subcategory.html?title=Drains%20-%20Shower%20Channels">Shower Channels</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Cisterns</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Cisterns%20-%20Concealed%20for%20WCs">Concealed for WCs</a></li>
+        <li><a href="subcategory.html?title=Cisterns%20-%20Concealed%20for%20Urinals">Concealed for Urinals</a></li>
+        <li><a href="subcategory.html?title=Cisterns%20-%20Exposed">Exposed</a></li>
+        <li><a href="subcategory.html?title=Cisterns%20-%20Elements">Elements</a></li>
+        <li><a href="subcategory.html?title=Cisterns%20-%20Flush%20Valves">Flush Valves</a></li>
+        <li><a href="subcategory.html?title=Cisterns%20-%20Actuator%20plates">Actuator plates</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Accessories</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Accessories%20-%20Sets">Sets</a></li>
+        <li><a href="subcategory.html?title=Accessories%20-%20Singles">Singles</a></li>
+        <li><a href="subcategory.html?title=Accessories%20-%20Electronic">Electronic</a></li>
+        <li><a href="subcategory.html?title=Accessories%20-%20Mirrors">Mirrors</a></li>
+        <li><a href="subcategory.html?title=Accessories%20-%20Handicapped">Handicapped</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <button type="button">Water Heater</button>
+      <ul class="side-sub">
+        <li><a href="subcategory.html?title=Water%20Heater%20-%20Wall-hung">Wall-hung</a></li>
+        <li><a href="subcategory.html?title=Water%20Heater%20-%20Central">Central</a></li>
+        <li><a href="subcategory.html?title=Water%20Heater%20-%20Solar">Solar</a></li>
+      </ul>
+    </div>
+  </div>
+</aside>
+
+<header class="site-header" role="banner">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Bayt Al Ebaa">
+      <img src="assets/img/1.jpg" alt="Bayt Al Ebaa Logo" loading="lazy" decoding="async">
+    </a>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="index.html" id="goProduct">Product category</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <form class="header-search" role="search" aria-label="Catalogue search" onsubmit="return false;">
+      <div class="icon" id="searchTrigger" title="Search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <input id="searchBox" type="text" placeholder="Search" autocomplete="off" />
+      <button type="button" class="clear" id="clearBtn" aria-label="Clear search" title="Clear">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div id="searchSuggest" class="search-suggest" hidden></div>
+    </form>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>Catalogue</h1>
+    <p>تصفّح كل الفئات بسرعة ووضوح — على كل الأجهزة.</p>
+  </div>
+</section>
+
+<section class="page-head" aria-label="Page header">
+  <div class="wrap">
+    <div class="breadcrumb">
+      <svg class="home-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <a href="index.html">Home</a><span aria-hidden="true">/</span><span>Product category</span>
+    </div>
+  </div>
+</section>
+
+<div class="layout">
+  <main class="catalog-tiles" aria-label="Bathroom categories">
+    <div class="tiles-head">
+      <h2>All categories</h2>
+      <button id="showAllBtn" class="switch" type="button" aria-pressed="false" title="Show all subcategories">
+        <span class="switch-label">Show all categories</span>
+        <span class="switch-track" aria-hidden="true"><span class="knob"></span></span>
+      </button>
+    </div>
+
+    <div id="tilesGrid" class="tiles-grid">
+      <!-- Cards -->
+      <article id="cat-wc" class="tile" data-img="assets/img/WC_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="wc-list" aria-expanded="false"><img alt="WC cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">WC</span></h3>
+          <ul id="wc-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Floor-Standing">Floor-Standing</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Close-coupled">Close-coupled</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Wall-Hung">Wall-Hung</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Concealed%20tank">Concealed tank</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Flush%20valve%20%28Ex.%29">Flush valve (Ex.)</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Seats%20%26%20covers">Seats &amp; covers</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Eastern">Eastern</a></li>
+            <li><a class="hl" href="subcategory.html?title=WC%20-%20Handicapped">Handicapped</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="wc-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <article id="cat-bidet" class="tile" data-img="assets/img/Bidet_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="bidet-list" aria-expanded="false"><img alt="Bidet cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Bidet</span></h3>
+          <ul id="bidet-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Bidet%20-%20Floor-Standing">Floor-Standing</a></li>
+            <li><a class="hl" href="subcategory.html?title=Bidet%20-%20Wall-hung">Wall-hung</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="bidet-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <article id="cat-urinal" class="tile" data-img="assets/img/Urinal_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="urinal-list" aria-expanded="false"><img alt="Urinal cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Urinal</span></h3>
+          <ul id="urinal-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Urinal%20-%20Top%20inlet">Top inlet</a></li>
+            <li><a class="hl" href="subcategory.html?title=Urinal%20-%20Rear%20inlet">Rear inlet</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="urinal-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Wash Basins -->
+      <article id="cat-wash" class="tile" data-img="assets/img/Wash_Basin_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="wash-list" aria-expanded="false"><img alt="Wash Basins cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Wash Basins</span></h3>
+          <ul id="wash-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Wall-mount%20%26%20Pedestals">Wall-mount &amp; Pedestals</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20One%20piece">One piece</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Floor-standing">Floor-standing</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Over%20counter">Over counter</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Under%20counter">Under counter</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Top%20counter">Top counter</a></li>
+            <li><a class="hl" href="subcategory.html?title=Wash%20Basins%20-%20Cabinet">Cabinet</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="wash-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Showers and Bathtubs -->
+      <article id="cat-bath" class="tile" data-img="assets/img/Showers_500x5604.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="bathtubs-list" aria-expanded="false"><img alt="Showers and Bathtubs cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Showers and Bathtubs</span></h3>
+          <ul id="bathtubs-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Free-standing">Free-standing</a></li>
+            <li><a class="hl" href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Drop-in">Drop-in</a></li>
+            <li><a class="hl" href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Hydromassage">Hydromassage</a></li>
+            <li><a class="hl" href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Shower%20tray">Shower tray</a></li>
+            <li><a class="hl" href="subcategory.html?title=Showers%20and%20Bathtubs%20-%20Shower%20cabinet">Shower cabinet</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="bathtubs-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Faucets -->
+      <article id="cat-mixers" class="tile" data-img="assets/img/Faucets_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="mixers-list" aria-expanded="false"><img alt="Faucets cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Faucets</span></h3>
+          <ul id="mixers-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Basin%20Mixers">Basin Mixers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Bath%20%26%20Shower%20Mixers">Bath &amp; Shower Mixers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Shower%20systems">Shower systems</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Shower%20Jets">Shower Jets</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Kitchen%20Mixers">Kitchen Mixers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Bidet%20Mixers">Bidet Mixers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Ablution%20Mixers">Ablution Mixers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Faucets%20-%20Taps">Taps</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="mixers-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Fittings -->
+      <article id="cat-fittings" class="tile" data-img="assets/img/Fittings_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="fittings-list" aria-expanded="false"><img alt="Fittings cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Fittings</span></h3>
+          <ul id="fittings-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Angle%20Valves">Angle Valves</a></li>
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Showers">Showers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Flexible%20hoses">Flexible hoses</a></li>
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Traps">Traps</a></li>
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Strainers">Strainers</a></li>
+            <li><a class="hl" href="subcategory.html?title=Fittings%20-%20Pop-ups">Pop-ups</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="fittings-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Sinks -->
+      <article id="cat-sinks" class="tile" data-img="assets/img/Sink_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="sinks-list" aria-expanded="false"><img alt="Sinks cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Sinks</span></h3>
+          <ul id="sinks-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Sinks%20-%20Stainless%20steel%20bowls">Stainless steel bowls</a></li>
+            <li><a class="hl" href="subcategory.html?title=Sinks%20-%20Cast%20iron%20bowls">Cast iron bowls</a></li>
+            <li><a class="hl" href="subcategory.html?title=Sinks%20-%20Vitreous%20China">Vitreous China</a></li>
+            <li><a class="hl" href="subcategory.html?title=Sinks%20-%20Service">Service</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="sinks-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Drains -->
+      <article id="cat-drains" class="tile" data-img="assets/img/Drain_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="drains-list" aria-expanded="false"><img alt="Drains cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Drains</span></h3>
+          <ul id="drains-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Drains%20-%20Floor%20drains">Floor drains</a></li>
+            <li><a class="hl" href="subcategory.html?title=Drains%20-%20Clean-outs">Clean-outs</a></li>
+            <li><a class="hl" href="subcategory.html?title=Drains%20-%20Shower%20Channels">Shower Channels</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="drains-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Cisterns -->
+      <article id="cat-cisterns" class="tile" data-img="assets/img/Cisterns_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="cisterns-list" aria-expanded="false"><img alt="Cisterns cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Cisterns</span></h3>
+          <ul id="cisterns-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Concealed%20for%20WCs">Concealed for WCs</a></li>
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Concealed%20for%20Urinals">Concealed for Urinals</a></li>
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Exposed">Exposed</a></li>
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Elements">Elements</a></li>
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Flush%20Valves">Flush Valves</a></li>
+            <li><a class="hl" href="subcategory.html?title=Cisterns%20-%20Actuator%20plates">Actuator plates</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="cisterns-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Accessories -->
+      <article id="cat-acc" class="tile" data-img="assets/img/Accessories_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="acc-list" aria-expanded="false"><img alt="Accessories cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Accessories</span></h3>
+          <ul id="acc-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Accessories%20-%20Sets">Sets</a></li>
+            <li><a class="hl" href="subcategory.html?title=Accessories%20-%20Singles">Singles</a></li>
+            <li><a class="hl" href="subcategory.html?title=Accessories%20-%20Electronic">Electronic</a></li>
+            <li><a class="hl" href="subcategory.html?title=Accessories%20-%20Mirrors">Mirrors</a></li>
+            <li><a class="hl" href="subcategory.html?title=Accessories%20-%20Handicapped">Handicapped</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="acc-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Water Heater -->
+      <article id="cat-wh" class="tile" data-img="assets/img/Water_Heater_500x560.jpg">
+        <div class="tile-media" role="button" tabindex="0" aria-controls="wh-list" aria-expanded="false"><img alt="Water Heater cover" loading="lazy" decoding="async"></div>
+        <div class="tile-body">
+          <h3 class="tile-title"><span class="nolink hl">Water Heater</span></h3>
+          <ul id="wh-list" class="sublist">
+            <li><a class="hl" href="subcategory.html?title=Water%20Heater%20-%20Wall-hung">Wall-hung</a></li>
+            <li><a class="hl" href="subcategory.html?title=Water%20Heater%20-%20Central">Central</a></li>
+            <li><a class="hl" href="subcategory.html?title=Water%20Heater%20-%20Solar">Solar</a></li>
+          </ul>
+          <button class="tile-toggle" type="button" aria-controls="wh-list" aria-expanded="false" title="Expand">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <div id="noResults" class="no-results" role="status" aria-live="polite" style="display:none;">No results found.</div>
+  </main>
+</div>
+
+<!-- Floating search -->
+<button class="search-fab" id="searchFab" aria-label="Search">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<script>
+(function(){
+  const searchBox=document.getElementById('searchBox');
+  const clearBtn=document.getElementById('clearBtn');
+  const noResults=document.getElementById('noResults');
+  const searchTrigger=document.getElementById('searchTrigger');
+  const suggest=document.getElementById('searchSuggest');
+  const searchFab=document.getElementById('searchFab');
+  searchBox.value='';
+
+  // صور الكروت من data-img
+  document.querySelectorAll('.tile').forEach(t=>{
+    const s=t.getAttribute('data-img');
+    const i=t.querySelector('img');
+    if(s&&i){ i.src=s; i.setAttribute('decoding','async'); i.loading='lazy'; }
+  });
+
+  const tiles=[...document.querySelectorAll('.tile')];
+  const toggles=[...document.querySelectorAll('.tile-toggle')];
+  const medias=[...document.querySelectorAll('.tile-media')];
+
+  const hlNodes=[...document.querySelectorAll('.hl')];
+  hlNodes.forEach(n=>n.dataset.orig=n.textContent);
+
+  function setExpanded(el,o){ if(el) el.setAttribute('aria-expanded',o?'true':'false'); }
+  function openOnly(target){
+    tiles.forEach(t=>{
+      const o=(t===target);
+      t.classList.toggle('is-open',o);
+      setExpanded(t.querySelector('.tile-toggle'),o);
+      setExpanded(t.querySelector('.tile-media'),o);
+    });
+  }
+  function toggleFrom(el){
+    const tile=el.closest('.tile');
+    const willOpen=!tile.classList.contains('is-open');
+    openOnly(willOpen ? tile : null);
+  }
+  toggles.forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleFrom(b)}));
+  medias.forEach(m=>{
+    m.addEventListener('click',e=>{e.preventDefault();toggleFrom(m)});
+    m.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleFrom(m)}})
+  });
+
+  const isDesktop=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(isDesktop){
+    tiles.forEach(tile=>{
+      tile.addEventListener('mouseenter',()=>{ setExpanded(tile.querySelector('.tile-toggle'),true); setExpanded(tile.querySelector('.tile-media'),true); });
+      tile.addEventListener('mouseleave',()=>{ if(!tile.classList.contains('is-open')){ setExpanded(tile.querySelector('.tile-toggle'),false); setExpanded(tile.querySelector('.tile-media'),false); } });
+    });
+  }
+
+  function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+  function mark(t,q){ if(!q) return t; return t.replace(new RegExp('('+esc(q)+')','ig'),'<mark>$1</mark>'); }
+  function highlight(q){ hlNodes.forEach(n=>{ const base=n.dataset.orig||n.textContent; n.innerHTML=q?mark(base,q):base; }); }
+  function norm(s){return (s||'').toLowerCase().trim()}
+
+  function filterTiles(){
+    const q=norm(searchBox.value);
+    const showAllActive = document.body.classList.contains('all-open');
+    highlight(q);
+    let any=false;
+    tiles.forEach(tile=>{
+      const title=tile.querySelector('.tile-title')?.innerText||'';
+      const items=[...tile.querySelectorAll('.sublist a')];
+      const tileMatch=norm(title).includes(q);
+      let count=0;
+      items.forEach(a=>{
+        const ok=norm(a.textContent||'').includes(q);
+        a.parentElement.style.display=ok||q===''?'':'none';
+        if(ok)count++;
+      });
+      const match=q===''?true:(tileMatch||count>0);
+      if(q!==''){
+        tile.classList.add('is-open');
+        setExpanded(tile.querySelector('.tile-toggle'),true);
+        setExpanded(tile.querySelector('.tile-media'),true);
+      }else{
+        tile.classList.toggle('is-open', showAllActive);
+        setExpanded(tile.querySelector('.tile-toggle'), showAllActive);
+        setExpanded(tile.querySelector('.tile-media'), showAllActive);
+      }
+      tile.style.display=match?'':'none';
+      if(match) any=true;
+      if(q===''){ items.forEach(a=>a.parentElement.style.display=''); }
+    });
+    noResults.style.display=any?'none':'';
+  }
+
+  // اقتراحات
+  const CATALOG=[
+    {id:'wc',cat:'WC',subs:['Floor-Standing','Close-coupled','Wall-Hung','Concealed tank','Flush valve (Ex.)','Seats & covers','Eastern','Handicapped']},
+    {id:'bidet',cat:'Bidet',subs:['Floor-Standing','Wall-hung']},
+    {id:'urinal',cat:'Urinal',subs:['Top inlet','Rear inlet']},
+    {id:'wash',cat:'Wash Basins',subs:['Wall-mount & Pedestals','One piece','Floor-standing','Over counter','Under counter','Top counter','Cabinet']},
+    {id:'bath',cat:'Showers and Bathtubs',subs:['Free-standing','Drop-in','Hydromassage','Shower tray','Shower cabinet']},
+    {id:'mixers',cat:'Faucets',subs:['Basin Mixers','Bath & Shower Mixers','Shower systems','Shower Jets','Kitchen Mixers','Bidet Mixers','Ablution Mixers','Taps']},
+    {id:'fittings',cat:'Fittings',subs:['Angle Valves','Showers','Flexible hoses','Traps','Strainers','Pop-ups']},
+    {id:'sinks',cat:'Sinks',subs:['Stainless steel bowls','Cast iron bowls','Vitreous China','Service']},
+    {id:'drains',cat:'Drains',subs:['Floor drains','Clean-outs','Shower Channels']},
+    {id:'cisterns',cat:'Cisterns',subs:['Concealed for WCs','Concealed for Urinals','Exposed','Elements','Flush Valves','Actuator plates']},
+    {id:'acc',cat:'Accessories',subs:['Sets','Singles','Electronic','Mirrors','Handicapped']},
+    {id:'wh',cat:'Water Heater',subs:['Wall-hung','Central','Solar']}
+  ];
+  function buildResults(q){
+    q=norm(q); if(!q) return [];
+    const out=[]; const seen=new Set();
+    CATALOG.forEach(c=>{
+      c.subs.forEach(s=>{
+        const combo=`${c.cat} - ${s}`; const l=combo.toLowerCase(); let score=0;
+        if(l.startsWith(q)) score+=3; else if(l.includes(q)) score+=1;
+        if(c.cat.toLowerCase().startsWith(q)) score+=2;
+        if(s.toLowerCase().startsWith(q)) score+=2;
+        if(score>0 && !seen.has(combo)){ seen.add(combo); out.push({cat:c.cat,sub:s,score,url:`subcategory.html?title=${encodeURIComponent(combo)}`}); }
+      });
+      if(c.cat.toLowerCase().includes(q)){
+        const key=`#${c.id}`; if(!seen.has(key)){ seen.add(key); out.push({cat:c.cat,sub:null,score:1.2,url:`index.html#cat-${c.id}`}); }
+      }
+    });
+    return out.sort((a,b)=>b.score-a.score).slice(0,12);
+  }
+  function renderSuggest(q){
+    const items=buildResults(q);
+    if(!q || items.length===0){ suggest.hidden=true; suggest.innerHTML=''; return; }
+    function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+    function mark(t,q){return t.replace(new RegExp('('+esc(q)+')','ig'),'<mark>$1</mark>')}
+    suggest.innerHTML = items.map(it=>`
+      <div class="item" data-url="${it.url}">
+        <div class="sub">${mark(it.sub?it.sub:it.cat, q)}</div>
+        <div class="cat">${it.sub?it.cat:'Category'}</div>
+      </div>`).join('');
+    suggest.hidden=false;
+    [...suggest.querySelectorAll('.item')].forEach(n=>n.addEventListener('click',()=>{location.href=n.dataset.url}));
+  }
+  function handleInput(){ filterTiles(); renderSuggest(searchBox.value); }
+  searchTrigger.addEventListener('click',()=>{ window.scrollTo({top:0,behavior:'smooth'}); searchBox.focus(); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('.header-search')){ suggest.hidden=true; } });
+  clearBtn.addEventListener('click',()=>{ clearBtn.classList.add('pressed'); searchBox.value=''; handleInput(); setTimeout(()=>clearBtn.classList.remove('pressed'),120); searchBox.focus(); });
+  searchBox.addEventListener('input',handleInput);
+  searchBox.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ suggest.hidden=true; }
+    else if(e.key==='Enter'){
+      const items=suggest.querySelectorAll('.item');
+      if(items.length){ location.href = items[0].dataset.url; }
+    }
+  });
+
+  // Drawer open/close
+  const openBtn=document.getElementById('openDrawer');
+  const drawer=document.getElementById('drawer');
+  const backdrop=document.getElementById('backdrop');
+  function openDrawer(){ document.body.classList.add('is-side-open'); backdrop.hidden=false; openBtn.setAttribute('aria-expanded','true'); drawer.setAttribute('aria-hidden','false'); }
+  function closeDrawer(){ document.body.classList.remove('is-side-open'); backdrop.hidden=true; openBtn.setAttribute('aria-expanded','false'); drawer.setAttribute('aria-hidden','true'); }
+  openBtn.addEventListener('click',()=>{ document.body.classList.contains('is-side-open')?closeDrawer():openDrawer(); });
+  backdrop.addEventListener('click',closeDrawer);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.body.classList.contains('is-side-open')) closeDrawer(); });
+
+  // Show all switch
+  const showAllBtn=document.getElementById('showAllBtn');
+  function setGlobalOpen(on){
+    document.body.classList.toggle('all-open', on);
+    showAllBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    tiles.forEach(t=>{
+      t.classList.toggle('is-open', on);
+      setExpanded(t.querySelector('.tile-toggle'), on);
+      setExpanded(t.querySelector('.tile-media'), on);
+    });
+  }
+  showAllBtn.addEventListener('click',()=>{ const next = showAllBtn.getAttribute('aria-pressed') !== 'true'; setGlobalOpen(next); });
+
+  searchFab.addEventListener('click',()=>{ window.scrollTo({top:0,behavior:'smooth'}); searchBox.focus(); });
+
+  // init
+  filterTiles();
+})();
+</script>
+</body>
+</html>
+
