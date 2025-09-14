@@ -1,5 +1,5 @@
 // 🗂 قائمة التصنيفات الرئيسية والفرعية
-const categories = [
+export const categories = [
   {
     name: "WC",
     subcategories: [
@@ -120,3 +120,4 @@ const categories = [
     ]
   }
 ];
+
