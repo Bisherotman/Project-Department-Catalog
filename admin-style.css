@@ -1,6 +1,6 @@
-/* ✅ admin-style.css - خاص بلوحة الإدارة */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 
+/* Root variables */
 :root {
   --brand: #6c1d2c;
   --brand-dark: #5a1524;
@@ -16,12 +16,23 @@
   --input-focus: #6c1d2c44;
   --transition: all 0.2s ease-in-out;
   --font: "Cairo", "Tajawal", "Poppins", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --line: #e6e9f0;
+  --accent: #374151;
+  --accent-2: #9ca3af;
+  --hover-bg: rgba(156, 163, 175, 0.15);
+  --mark: #fff3a3;
+  --side-bg: #f1f3f6;
+  --overlay: rgba(0, 0, 0, 0.35);
 }
 
-*, *::before, *::after {
+/* Global box-sizing */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+/* Body */
 body {
   margin: 0;
   font-family: var(--font);
@@ -30,26 +41,43 @@ body {
   direction: rtl;
 }
 
+/* Links */
 a {
   color: inherit;
   text-decoration: none;
 }
 
+/* Focus styles */
+:where(a, button, [role="button"], .chip, .tile-toggle, .tile-media, .switch):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* Admin container */
 main.admin, .admin {
-  max-width: 600px;
+  max-width: min(600px, 90vw);
   margin: 40px auto;
-  padding: 24px 32px;
+  padding: 2rem 2rem;
   background-color: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   animation: fadeIn 0.5s ease-in-out;
 }
 
+/* Fade-in animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* Sections */
 .admin section {
   display: flex;
   flex-direction: column;
@@ -57,19 +85,21 @@ main.admin, .admin {
   margin-bottom: 20px;
 }
 
+/* Headings */
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* 24px */
   margin-bottom: 16px;
   color: var(--brand-dark);
   text-align: center;
 }
 
+/* Inputs */
 input,
 .input input,
 .input select {
   width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 14px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.875rem;
   border: 1px solid var(--input-border);
   border-radius: var(--radius);
   background-color: var(--input-bg);
@@ -77,6 +107,7 @@ input,
   transition: var(--transition);
   font-family: var(--font);
   min-width: 0;
+  box-sizing: border-box;
 }
 
 input:focus,
@@ -87,10 +118,11 @@ input:focus,
   box-shadow: 0 0 0 3px var(--input-focus);
 }
 
+/* Buttons */
 button {
   display: inline-block;
   width: 100%;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
   background-color: var(--brand);
   color: #fff;
   border: none;
@@ -106,47 +138,36 @@ button:hover {
   background-color: var(--brand-dark);
 }
 
-@media (max-width: 600px) {
+/* Responsive adjustments */
+@media (max-width: 900px) {
   main.admin, .admin {
-    margin: 20px;
-    padding: 24px;
+    max-width: 95vw;
+    margin: 30px auto;
+    padding: 1.5rem 1.5rem;
   }
   h2 {
-    font-size: 1.25rem;
+    font-size: 1.375rem; /* 22px */
   }
   input, button {
     font-size: 0.95rem;
   }
 }
 
+@media (max-width: 600px) {
+  main.admin, .admin {
+    margin: 20px 10px;
+    padding: 1rem 1rem;
+  }
+  h2 {
+    font-size: 1.25rem; /* 20px */
+  }
+  input, button {
+    font-size: 0.9rem;
+  }
+}
+
+/* Datalist options */
 datalist option {
   font-family: var(--font);
   padding: 8px;
-}
-
-/* العناصر التفاعلية */
-:where(a, button, [role="button"]):focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-  border-radius: 10px;
-}
-
-#logout-btn:hover {
-  background-color: #6c1d2c; /* نفس اللون ما يتغير */
-}
-
-.logout-small {
-  background: none;
-  border: none;
-  color: #6c1d2c; /* اللون الخمري */
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: 0.3s;
-}
-
-.logout-small:hover {
-  color: #a52840; /* لون أفتح عند التمرير */
-  text-decoration: underline;
 }
