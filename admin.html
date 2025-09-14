@@ -95,7 +95,7 @@
         </div>
       </div>
       <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-        <button id="saveProduct" class="btn primary">حفظ المنتج</button>
+        <button id="saveProduct" class="btn primary">حفظ الصنف</button>
         <span id="msg" class="muted"></span>
       </div>
     </div>
@@ -254,7 +254,7 @@
         createdAt: serverTimestamp()
       };
       await setDoc(doc(db,'products', id), payload);
-      showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
+      showOK("✔ تم حفظ الصنف وظهر في الصفحة الفرعية");
       ["sap","factory","imageUrl"].forEach(k => {
         const el = document.getElementById(k);
         if (el) el.value = "";
