@@ -219,25 +219,48 @@
     }
     $("#brandSelect").addEventListener('change', e=> fillModels(e.target.value));
 
-    // Save product
-    $("#saveProduct").addEventListener('click', async()=>{
-      const cat = $("#catSelect").value || '';
-      const sub = $("#subSelect").value || '';
-      const brand = $("#brandSelect").value || '';
-      const model = $("#modelSelect").value || '';
-      const sap = $("#sap").value.trim();
-      const factory = $("#factory").value.trim();
-      const imageUrl = $("#imageUrl").value.trim();
-      if(!cat) return showERR("اختر التصنيف الأساسي");
-      const path = sub ? `${cat} - ${sub}` : cat;
-      try{
-        const id = `${cat}-${sub||'general'}-${Date.now()}`;
-        const payload = { cat, sub, path, brand, model, sapCode: sap, factoryCode: factory, imageUrl, createdAt: serverTimestamp() };
-        await setDoc(doc(db,'products', id), payload);
-        showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
-        ["sap","factory","imageUrl"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
-      }catch(e){ showERR(e); }
+  // Save product
+$("#saveProduct").addEventListener('click', async ()=>{
+  const cat     = $("#catSelect").value || '';
+  const sub     = $("#subSelect").value || '';
+  const brand   = $("#brandSelect").value || '';
+  const model   = $("#modelSelect").value || '';
+  const sap     = $("#sap").value.trim();
+  const factory = $("#factory").value.trim();
+  const imageUrl= $("#imageUrl").value.trim();
+
+  if(!cat) return showERR("اختر التصنيف الأساسي");
+
+  const path = sub ? `${cat} - ${sub}` : cat;
+
+  try{
+    const id = `${cat}-${sub || 'general'}-${Date.now()}`;
+
+    const payload = {
+      // الحقول الجديدة
+      cat, sub, path, brand, model,
+      sapCode: sap,
+      factoryCode: factory,
+      imageUrl,
+
+      // حقول التوافق مع الواجهة الحالية
+      sap,                 // نفس sapCode
+      factory: factory,    // نفس factoryCode
+      photo: imageUrl,     // نفس imageUrl
+
+      createdAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db,'products', id), payload);
+    showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
+
+    ["sap","factory","imageUrl"].forEach(k => {
+      const el = document.getElementById(k);
+      if (el) el.value = "";
     });
+  }catch(e){ showERR(e); }
+});
+
 
     // Init
     (async()=>{
