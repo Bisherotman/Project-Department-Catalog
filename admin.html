@@ -172,54 +172,7 @@
         setFormEnabled(false);
       }
     });
-
-   import { categories } from './categories-data.js';
-
-function loadCategories(){
-  const catSel = document.querySelector("#catSelect");
-  const subSel = document.querySelector("#subSelect");
-
-  catSel.innerHTML = "";
-  subSel.innerHTML = "";
-
-  categories.forEach(c => {
-    const o = document.createElement("option");
-    o.value = c.name;
-    o.textContent = c.name;
-    catSel.appendChild(o);
-  });
-
-  if (categories.length > 0) {
-    fillSubs(categories[0].name);
-  }
-}
-
-function fillSubs(main){
-  const subSel = document.querySelector("#subSelect");
-  subSel.innerHTML = "";
-
-  const entry = categories.find(c => c.name === main);
-  const subs = entry ? entry.subcategories : [];
-
-  if (subs.length === 0) {
-    const o = document.createElement("option");
-    o.value = "";
-    o.textContent = "— لا يوجد —";
-    subSel.appendChild(o);
-  } else {
-    subs.forEach(s => {
-      const o = document.createElement("option");
-      o.value = s;
-      o.textContent = s;
-      subSel.appendChild(o);
-    });
-  }
-}
-
-document.querySelector("#catSelect").addEventListener("change", (e) => {
-  fillSubs(e.target.value);
-});
-
+    
    import { categories } from './categories-data.js';
 
 function loadCategories(){
@@ -316,6 +269,5 @@ $("#saveProduct").addEventListener('click', async ()=>{
       await loadBrands();
     })().catch(console.error);
   </script>
-  <script src="categories-data.js"></script>
 </body>
 </html>
