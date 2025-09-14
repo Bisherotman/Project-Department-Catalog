@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة الإدارة</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- CSP مناسبة لـ Auth + Firestore فقط -->
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self' https: data:;
              img-src 'self' https: data:;
@@ -13,32 +12,34 @@
              font-src https://fonts.gstatic.com;
              script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
              connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body{background:#f6f7f9}
-    .admin{max-width:1000px;margin:24px auto;padding:0 16px}
+    .admin{max-width:1100px;margin:24px auto;padding:0 16px}
     .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:860px){.row{grid-template-columns:1fr}}
+    @media(max-width:920px){.row{grid-template-columns:1fr}}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:920px){.grid-3{grid-template-columns:1fr}}
     .input{display:grid;gap:6px}
-    .input input,.input select,.input textarea{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
+    .input input,.input select{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
     .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
     .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
     .muted{color:#616a77;font-size:13px}
     .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
     .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
     .disabled-mask{opacity:.5;pointer-events:none}
-    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    @media(max-width:860px){.grid-3{grid-template-columns:1fr}}
     .spacer{height:10px}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .toolbar .right{margin-inline-start:auto}
   </style>
 </head>
 <body>
   <div class="admin">
-    <h2 id="pageTitle">لوحة الإدارة</h2>
-    <p class="muted" id="note">الحسابات تُنشأ وتُدار من قِبل الإدارة فقط.</p>
+    <div class="toolbar">
+      <h2 id="pageTitle" style="margin:0">لوحة الإدارة</h2>
+      <div class="right muted"><a href="admin-categories.html">صفحة إدارة الأصناف</a></div>
+    </div>
+    <p class="muted">الحسابات تُنشأ وتُدار من قِبل الإدارة فقط.</p>
 
     <!-- Auth -->
     <div class="card">
@@ -63,39 +64,25 @@
 
     <div class="spacer"></div>
 
-    <!-- إضافة تصنيف -->
+    <!-- إدارة البراند/الموديل -->
     <div class="card">
-      <h3>إضافة تصنيف إلى الكتالوج</h3>
+      <h3>إدارة البراندات والموديلات</h3>
       <div class="row">
         <div class="input">
-          <label>التصنيف الأساسي</label>
-          <input id="newCat" placeholder="مثال: WC">
+          <label>إضافة براند</label>
+          <div style="display:flex; gap:8px;">
+            <input id="brandName" placeholder="مثال: GROHE" style="flex:1">
+            <button id="saveBrand" class="btn">حفظ البراند</button>
+          </div>
         </div>
         <div class="input">
-          <label>التصنيف الفرعي (اختياري)</label>
-          <input id="newSub" placeholder="مثال: Wall-Hung">
+          <label>إضافة موديل للبراند المحدد</label>
+          <div style="display:flex; gap:8px;">
+            <input id="modelName" placeholder="اسم الموديل" style="flex:1">
+            <button id="saveModel" class="btn">حفظ الموديل</button>
+          </div>
+          <span class="muted">يتم ربط الموديل بالبراند المختار في فورم المنتج أدناه.</span>
         </div>
-      </div>
-      <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
-        <button id="saveCat" class="btn primary">حفظ التصنيف</button>
-        <span class="muted">سيظهر فورًا في خيارات النموذج أدناه.</span>
-      </div>
-    </div>
-
-    <div class="spacer"></div>
-
-    <!-- إضافة براند -->
-    <div class="card">
-      <h3>إضافة براند</h3>
-      <div class="row">
-        <div class="input">
-          <label>اسم البراند</label>
-          <input id="brandName" placeholder="مثال: GROHE">
-        </div>
-      </div>
-      <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
-        <button id="saveBrand" class="btn">حفظ البراند</button>
-        <span class="muted">يمكنك أيضًا تزويدي بقائمة البراندات لأضيفها دفعة واحدة.</span>
       </div>
     </div>
 
@@ -121,7 +108,7 @@
       <div class="row" style="margin-top:12px">
         <div class="input">
           <label>الموديل</label>
-          <input id="model" placeholder="Model">
+          <select id="modelSelect"></select>
         </div>
         <div class="input">
           <label>كود SAP</label>
@@ -148,28 +135,16 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { 
-      getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ⚠️ ضع إعدادات مشروعك هنا (من Project settings → Web app → Config)
-    const firebaseConfig = {
-  apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-  authDomain: "projects-catalog.firebaseapp.com",
-  projectId: "projects-catalog",
-  storageBucket: "projects-catalog.firebasestorage.app",
-  messagingSenderId: "813379257336",
-  appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-};
+    // ⚠️ config
+    const firebaseConfig = { apiKey:"YOUR_API_KEY", authDomain:"YOUR_PROJECT.firebaseapp.com", projectId:"YOUR_PROJECT", storageBucket:"YOUR_PROJECT.appspot.com", messagingSenderId:"", appId:"" };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // العنوان = عنوان التبويبة
-    const h2 = document.getElementById('pageTitle');
-    document.title = h2.textContent;
-    // من الملاحظات: الحسابات تُدار من الإدارة فقط
-    document.getElementById('note').textContent = "الحسابات تُنشأ وتُدار من قِبل الإدارة فقط.";
+    // Title = tab title
+    document.title = document.getElementById('pageTitle').textContent;
 
     const $ = s=>document.querySelector(s);
     const ok = $("#ok"), err = $("#err"), who = $("#who");
@@ -178,95 +153,84 @@
 
     function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
     function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
-    function setFormEnabled(en){ formCard.classList.toggle("disabled-mask", !en); [...formCard.querySelectorAll("input,select,button")].forEach(el=>{ if(el.id!=='logout') el.disabled=!en; }); }
+    function setFormEnabled(en){ formCard.classList.toggle("disabled-mask", !en); [...formCard.querySelectorAll("input,select,button")].forEach(el=>{ if(el.id!=='logout' && el.id!=='saveBrand' && el.id!=='saveModel') el.disabled=!en; }); }
 
-    // تحميل القوائم (تصنيفات / براندات)
-    let catMap = new Map(); // main -> Set(subs)
-    async function loadCategories(){
-      catMap = new Map();
-      const snap = await getDocs(query(collection(db,'categories')));
-      snap.forEach(d=>{
-        const data = d.data();
-        const cat = (data.cat||'').trim();
-        const sub = (data.sub||'').trim();
-        if(!cat) return;
-        if(!catMap.has(cat)) catMap.set(cat, new Set());
-        if(sub) catMap.get(cat).add(sub);
-      });
-      // املأ select
-      const catSel = $("#catSelect"); const subSel = $("#subSelect");
-      catSel.innerHTML = ""; subSel.innerHTML = "";
-      [...catMap.keys()].sort().forEach(c=>{
-        const opt = document.createElement('option'); opt.value = c; opt.textContent = c; catSel.appendChild(opt);
-      });
-      if(catSel.value) fillSubs(catSel.value);
-    }
-    function fillSubs(cat){
-      const subSel = $("#subSelect"); subSel.innerHTML = "";
-      const subs = [...(catMap.get(cat)||new Set())].sort();
-      if(subs.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد —'; subSel.appendChild(o); }
-      else subs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; subSel.appendChild(o); });
-    }
-    $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
-
-    async function loadBrands(){
-      const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
-      const sel = $("#brandSelect"); sel.innerHTML = "";
-      let list = [];
-      if(snap){ snap.forEach(d=> list.push(d.id)); }
-      // fallback افتراضي لو ما في مجموعة brands
-      if(list.length===0) list = ["GROHE","VitrA","Roca","Duravit","Hansgrohe","Geberit"];
-      list.sort().forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
-    }
-
-    // تسجيل الدخول/الخروج
+    // Auth
     loginBtn.addEventListener('click', async()=>{
       const email = $("#email").value.trim();
       const password = $("#password").value;
-      try{
-        await signInWithEmailAndPassword(auth, email, password);
-        showOK("تم تسجيل الدخول");
-      }catch(e){ showERR(e); }
+      try{ await signInWithEmailAndPassword(auth, email, password); showOK("تم تسجيل الدخول"); }
+      catch(e){ showERR(e); }
     });
-    logoutBtn.addEventListener('click', async()=>{
-      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
-    });
+    logoutBtn.addEventListener('click', async()=>{ try{ await signOut(auth); showOK("تم تسجيل الخروج"); } catch(e){ showERR(e); } });
 
     onAuthStateChanged(auth, (user)=>{
       if(user){
         const name = user.displayName || user.email || 'مستخدم';
         who.textContent = `المستخدم: ${name}`;
-        loginBtn.style.display = 'none';   // إخفاء تسجيل الدخول بعد الدخول
+        loginBtn.style.display = 'none';
         $("#email").disabled = true; $("#password").disabled = true;
         setFormEnabled(true);
       }else{
         who.textContent = "";
-        loginBtn.style.display = '';       // إظهار الزر عند تسجيل الخروج
+        loginBtn.style.display = '';
         $("#email").disabled = false; $("#password").disabled = false;
         setFormEnabled(false);
       }
     });
 
-    // حفظ تصنيف
-    $("#saveCat").addEventListener('click', async()=>{
-      const cat = ($("#newCat").value||'').trim();
-      const sub = ($("#newSub").value||'').trim();
-      if(!cat) return showERR("أدخل التصنيف الأساسي");
-      const id = sub ? `${cat} - ${sub}` : `${cat}`;
-      try{
-        await setDoc(doc(db,'categories', id), { cat, sub, path: sub ? `${cat} - ${sub}` : cat, createdAt: serverTimestamp() }, { merge:true });
-        showOK("✔ تم حفظ التصنيف");
-        $("#newCat").value = ""; $("#newSub").value = "";
-        await loadCategories();
-      }catch(e){ showERR(e); }
-    });
+    // Load categories from 'categories_fixed' (docId = main cat, field 'subs' = array)
+    let catData = [];
+    async function loadCategories(){
+      const snap = await getDocs(query(collection(db,'categories_fixed')));
+      catData = [];
+      snap.forEach(d=>{
+        const subs = Array.isArray(d.data().subs) ? d.data().subs : [];
+        catData.push({ main: d.id, subs });
+      });
+      const catSel = $("#catSelect"), subSel = $("#subSelect");
+      catSel.innerHTML = ""; subSel.innerHTML = "";
+      catData.sort((a,b)=> a.main.localeCompare(b.main,'ar')).forEach(c=>{
+        const o = document.createElement('option'); o.value=c.main; o.textContent=c.main; catSel.appendChild(o);
+      });
+      if(catData.length){ fillSubs(catData[0].main); }
+    }
+    function fillSubs(main){
+      const subSel = $("#subSelect"); subSel.innerHTML = "";
+      const entry = catData.find(c=>c.main===main);
+      const subs = entry ? entry.subs.slice().sort((a,b)=>a.localeCompare(b,'ar')) : [];
+      if(subs.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد —'; subSel.appendChild(o); }
+      else subs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; subSel.appendChild(o); });
+    }
+    $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
 
-    // حفظ براند
+    // Load brands and models
+    async function loadBrands(){
+      const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
+      const sel = $("#brandSelect"); sel.innerHTML = "";
+      let list = [];
+      if(snap){ snap.forEach(d=> list.push(d.id)); }
+      if(list.length===0) list = []; // لا براندات افتراضية
+      list.sort((a,b)=>a.localeCompare(b,'en')).forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+      await fillModels(sel.value);
+    }
+    async function fillModels(brand){
+      const sel = $("#modelSelect"); sel.innerHTML = "";
+      if(!brand){ const o=document.createElement('option'); o.value=''; o.textContent='—'; sel.appendChild(o); return; }
+      const qRef = query(collection(db,'models'), where('brand','==', brand));
+      const snap = await getDocs(qRef);
+      const names = [];
+      snap.forEach(d=> names.push(d.data().name));
+      names.sort((a,b)=>a.localeCompare(b,'en')).forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+      if(names.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد موديلات لهذا البراند —'; sel.appendChild(o); }
+    }
+    $("#brandSelect").addEventListener('change', e=> fillModels(e.target.value));
+
+    // Save brand
     $("#saveBrand").addEventListener('click', async()=>{
       const name = ($("#brandName").value||'').trim();
       if(!name) return;
       try{
-        // نستخدم اسم البراند كـ document id
         await setDoc(doc(db,'brands', name), { createdAt: serverTimestamp() }, { merge:true });
         showOK("✔ تم حفظ البراند");
         $("#brandName").value = "";
@@ -274,30 +238,46 @@
       }catch(e){ showERR(e); }
     });
 
-    // حفظ منتج
+    // Save model for selected brand
+    $("#saveModel").addEventListener('click', async()=>{
+      const brand = $("#brandSelect").value || '';
+      const name = ($("#modelName").value||'').trim();
+      if(!brand) return showERR("اختر البراند أولاً");
+      if(!name) return;
+      try{
+        const id = `${brand}__${name}`;
+        await setDoc(doc(db,'models', id), { brand, name, createdAt: serverTimestamp() }, { merge:true });
+        showOK("✔ تم حفظ الموديل");
+        $("#modelName").value = "";
+        await fillModels(brand);
+      }catch(e){ showERR(e); }
+    });
+
+    // Save product
     $("#saveProduct").addEventListener('click', async()=>{
       const cat = $("#catSelect").value || '';
       const sub = $("#subSelect").value || '';
       const brand = $("#brandSelect").value || '';
-      const model = $("#model").value.trim();
+      const model = $("#modelSelect").value || '';
       const sap = $("#sap").value.trim();
       const factory = $("#factory").value.trim();
       const imageUrl = $("#imageUrl").value.trim();
-
       if(!cat) return showERR("اختر التصنيف الأساسي");
-      // path يساوي "cat - sub" إن وُجد sub
       const path = sub ? `${cat} - ${sub}` : cat;
       try{
         const id = `${cat}-${sub||'general'}-${Date.now()}`;
         const payload = { cat, sub, path, brand, model, sapCode: sap, factoryCode: factory, imageUrl, createdAt: serverTimestamp() };
         await setDoc(doc(db,'products', id), payload);
         showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
-        ["model","sap","factory","imageUrl"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+        ["sap","factory","imageUrl"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
       }catch(e){ showERR(e); }
     });
 
-    // تهيئة القوائم عند الفتح
-    loadCategories().then(loadBrands).catch(console.error);
+    // Init
+    (async()=>{
+      await loadCategories();
+      await loadBrands();
+    })().catch(console.error);
   </script>
 </body>
 </html>
