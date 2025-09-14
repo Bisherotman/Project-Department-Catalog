@@ -96,8 +96,7 @@ searchFab?.addEventListener("click", ()=> searchBox?.focus());
 async function loadProducts(){
   // We match the field 'path' that stores the exact label like "WC - Wall-Hung"
   const qRef = query(collection(db, "products"),
-                     where("path", "==", PATH),
-                     orderBy("createdAt", "desc"));
+                   where("path", "==", PATH));
   const snap = await getDocs(qRef);
   products = snap.docs.map(d => ({ id:d.id, ...d.data() }));
   filtered = [...products];
