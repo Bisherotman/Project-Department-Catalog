@@ -1,147 +1,272 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة الإدارة</title>
   <link rel="stylesheet" href="style.css" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' https: data:;
+             img-src 'self' https: data:;
+             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+             font-src https://fonts.gstatic.com;
+             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com;
+             connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
   <style>
-    body {
-      background-color: #f6f7f9;
-      font-family: 'Arial', sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      color: #111827;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      max-width: 1200px;
-      margin: auto;
-    }
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .row > div {
-      flex: 1;
-      min-width: 220px;
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      font-size: 14px;
-      color: #374151;
-      margin-bottom: 4px;
-    }
-    input, select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 12px;
-      background-color: #6c1d2c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #5a1524;
-    }
+    body{background:#f6f7f9}
+    .admin{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:920px){.row{grid-template-columns:1fr}}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:920px){.grid-3{grid-template-columns:1fr}}
+    .input{display:grid;gap:6px}
+    .input input,.input select{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
+    .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
+    .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
+    .muted{color:#616a77;font-size:13px}
+    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+    .disabled-mask{opacity:.5;pointer-events:none}
+    .spacer{height:10px}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .toolbar .right{margin-inline-start:auto}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🛠️ إضافة منتج</h1>
-    <div class="row">
-      <div>
-        <label for="mainCategory">التصنيف الأساسي:</label>
-        <select id="mainCategory"></select>
+  <div class="admin">
+    <div class="toolbar">
+      <h2 id="pageTitle" style="margin:0">لوحة الإدارة</h2>
+      <div class="right muted"><a href="admin-categories.html">صفحة إدارة الأصناف</a></div>
+    </div>
+    <p class="muted">الحسابات تُنشأ وتُدار من قِبل الإدارة فقط.</p>
+
+    <!-- Auth -->
+    <div class="card">
+      <div class="row">
+        <div class="input">
+          <label>البريد الإلكتروني</label>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="username">
+        </div>
+        <div class="input">
+          <label>كلمة المرور</label>
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
       </div>
-      <div>
-        <label for="subCategory">التصنيف الفرعي:</label>
-        <select id="subCategory"></select>
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+        <button id="login" class="btn primary">تسجيل الدخول</button>
+        <button id="logout" class="btn" style="display:none">تسجيل الخروج</button>
+        <div id="who" class="muted" style="margin-inline-start:auto"></div>
       </div>
-      <div>
-        <label for="brand">البراند:</label>
-        <input type="text" id="brand" />
+      <div id="ok" class="ok"></div>
+      <div id="err" class="err"></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- Products -->
+    <div id="card-products" class="card">
+      <h3>إضافة منتج</h3>
+      <div class="grid-3">
+        <div class="input">
+          <label>التصنيف الأساسي</label>
+          <select id="catSelect"></select>
+        </div>
+        <div class="input">
+          <label>التصنيف الفرعي</label>
+          <select id="subSelect"></select>
+        </div>
+        <div class="input">
+          <label>البراند</label>
+          <select id="brandSelect"></select>
+        </div>
       </div>
-      <div>
-        <label for="model">الموديل:</label>
-        <input type="text" id="model" />
+      <div class="row" style="margin-top:12px">
+        <div class="input">
+          <label>الموديل</label>
+          <select id="modelSelect"></select>
+        </div>
+        <div class="input">
+          <label>كود SAP</label>
+          <input id="sap" placeholder="SAP code">
+        </div>
       </div>
-      <div>
-        <label for="factory">كود المصنع:</label>
-        <input type="text" id="factory" />
+      <div class="row">
+        <div class="input">
+          <label>كود المصنع</label>
+          <input id="factory" placeholder="Factory code">
+        </div>
+        <div class="input">
+          <label>رابط الصورة (خارجي)</label>
+          <input id="imageUrl" placeholder="https://... أو assets/products/WC/xyz.webp">
+        </div>
       </div>
-      <div>
-        <label for="sap">كود SAP:</label>
-        <input type="text" id="sap" />
-      </div>
-      <div style="flex: 2;">
-        <label for="imageUrl">رابط الصورة:</label>
-        <input type="text" id="imageUrl" placeholder="https://... أو assets/WC/xyz.webp" />
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <button id="saveProduct" class="btn primary">حفظ المنتج</button>
+        <span id="msg" class="muted"></span>
       </div>
     </div>
-    <button onclick="addProduct()">➕ إضافة المنتج</button>
-    <div id="msg" style="margin-top:10px; font-size:14px;"></div>
   </div>
 
-  <script src="subcategory.js"></script>
-  <script>
-    const mainCat = document.getElementById("mainCategory");
-    const subCat = document.getElementById("subCategory");
-    const msg = document.getElementById("msg");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    categories.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat.name;
-      opt.textContent = cat.name;
-      mainCat.appendChild(opt);
+    // ✅ config (أُزيل التكرار الذي كان يسبب كسر السكربت)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
+      authDomain: "projects-catalog.firebaseapp.com",
+      projectId: "projects-catalog",
+      storageBucket: "projects-catalog.firebasestorage.app",
+      messagingSenderId: "813379257336",
+      appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Title = tab title
+    document.title = document.getElementById('pageTitle').textContent;
+
+    const $ = s=>document.querySelector(s);
+    const ok = $("#ok"), err = $("#err"), who = $("#who");
+    const loginBtn = $("#login"), logoutBtn = $("#logout");
+    const formCard = document.getElementById("card-products");
+
+    function showOK(t){ ok.textContent=t; ok.style.display="block"; err.style.display="none"; }
+    function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
+    function setFormEnabled(en){
+      formCard.classList.toggle("disabled-mask", !en);
+      [...formCard.querySelectorAll("input,select,button")].forEach(el=>{
+        if(el.id!=='logout') el.disabled=!en;
+      });
+    }
+
+    // Auth
+    loginBtn.addEventListener('click', async()=>{
+      const email = $("#email").value.trim();
+      const password = $("#password").value;
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+        showOK("تم تسجيل الدخول");
+      }catch(e){ showERR(e); }
+    });
+    logoutBtn.addEventListener('click', async()=>{
+      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); }
     });
 
-    mainCat.addEventListener("change", () => {
-      const selected = categories.find(c => c.name === mainCat.value);
-      subCat.innerHTML = "";
-      if (selected && selected.subcategories.length) {
-        selected.subcategories.forEach(sub => {
-          const opt = document.createElement("option");
-          opt.value = sub;
-          opt.textContent = sub;
-          subCat.appendChild(opt);
-        });
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        const name = user.displayName || user.email || 'مستخدم';
+        who.textContent = `المستخدم: ${name}`;
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = '';
+        $("#email").disabled = true; $("#password").disabled = true;
+        setFormEnabled(true);
+      }else{
+        who.textContent = "";
+        loginBtn.style.display = '';
+        logoutBtn.style.display = 'none';
+        $("#email").disabled = false; $("#password").disabled = false;
+        setFormEnabled(false);
       }
     });
 
-    window.addEventListener("DOMContentLoaded", () => {
-      mainCat.value = categories[0].name;
-      mainCat.dispatchEvent(new Event("change"));
-    });
-
-    function addProduct() {
-      const product = {
-        mainCategory: mainCat.value,
-        subCategory: subCat.value,
-        brand: document.getElementById("brand").value,
-        model: document.getElementById("model").value,
-        factory: document.getElementById("factory").value,
-        sap: document.getElementById("sap").value,
-        imageUrl: document.getElementById("imageUrl").value,
-        createdAt: new Date().toISOString()
-      };
-      console.log("📦 المنتج:", product);
-      msg.textContent = "✔ تم حفظ المنتج (في الذاكرة المحلية فقط).";
-      msg.style.color = "green";
+    // Load categories from 'categories_fixed' (docId = main, field 'subs' = array)
+    let catData = [];
+    async function loadCategories(){
+      const snap = await getDocs(query(collection(db,'categories_fixed')));
+      catData = [];
+      snap.forEach(d=>{
+        const subs = Array.isArray(d.data().subs) ? d.data().subs : [];
+        catData.push({ main: d.id, subs });
+      });
+      const catSel = $("#catSelect"), subSel = $("#subSelect");
+      catSel.innerHTML = ""; subSel.innerHTML = "";
+      catData.sort((a,b)=> a.main.localeCompare(b.main,'ar')).forEach(c=>{
+        const o = document.createElement('option'); o.value=c.main; o.textContent=c.main; catSel.appendChild(o);
+      });
+      if(catData.length){ fillSubs(catData[0].main); }
     }
+    function fillSubs(main){
+      const subSel = $("#subSelect"); subSel.innerHTML = "";
+      const entry = catData.find(c=>c.main===main);
+      const subs = entry ? entry.subs.slice().sort((a,b)=>a.localeCompare(b,'ar')) : [];
+      if(subs.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد —'; subSel.appendChild(o); }
+      else subs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; subSel.appendChild(o); });
+    }
+    $("#catSelect").addEventListener('change', e=> fillSubs(e.target.value));
+
+    // Load brands and models (للقوائم فقط - الإدارة نُقلت لصفحة الأصناف)
+    async function loadBrands(){
+      const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
+      const sel = $("#brandSelect"); sel.innerHTML = "";
+      let list = [];
+      if(snap){ snap.forEach(d=> list.push(d.id)); }
+      list.sort((a,b)=>a.localeCompare(b,'en')).forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+      await fillModels(sel.value);
+    }
+    async function fillModels(brand){
+      const sel = $("#modelSelect"); sel.innerHTML = "";
+      if(!brand){ const o=document.createElement('option'); o.value=''; o.textContent='—'; sel.appendChild(o); return; }
+      const qRef = query(collection(db,'models'), where('brand','==', brand));
+      const snap = await getDocs(qRef);
+      const names = [];
+      snap.forEach(d=> names.push(d.data().name));
+      names.sort((a,b)=>a.localeCompare(b,'en')).forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+      if(names.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— لا يوجد موديلات لهذا البراند —'; sel.appendChild(o); }
+    }
+    $("#brandSelect").addEventListener('change', e=> fillModels(e.target.value));
+
+  // Save product
+$("#saveProduct").addEventListener('click', async ()=>{
+  const cat     = $("#catSelect").value || '';
+  const sub     = $("#subSelect").value || '';
+  const brand   = $("#brandSelect").value || '';
+  const model   = $("#modelSelect").value || '';
+  const sap     = $("#sap").value.trim();
+  const factory = $("#factory").value.trim();
+  const imageUrl= $("#imageUrl").value.trim();
+
+  if(!cat) return showERR("اختر التصنيف الأساسي");
+
+  const path = sub ? `${cat} - ${sub}` : cat;
+
+  try{
+    const id = `${cat}-${sub || 'general'}-${Date.now()}`;
+
+    const payload = {
+      // الحقول الجديدة
+      cat, sub, path, brand, model,
+      sapCode: sap,
+      factoryCode: factory,
+      imageUrl,
+
+      // حقول التوافق مع الواجهة الحالية
+      sap,                 // نفس sapCode
+      factory: factory,    // نفس factoryCode
+      photo: imageUrl,     // نفس imageUrl
+
+      createdAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db,'products', id), payload);
+    showOK("✔ تم حفظ المنتج وظهر في الصفحة الفرعية");
+
+    ["sap","factory","imageUrl"].forEach(k => {
+      const el = document.getElementById(k);
+      if (el) el.value = "";
+    });
+  }catch(e){ showERR(e); }
+});
+
+
+    // Init
+    (async()=>{
+      await loadCategories();
+      await loadBrands();
+    })().catch(console.error);
   </script>
 </body>
 </html>
