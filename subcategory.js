@@ -1,108 +1,96 @@
-// subcategory.js (Firestore-powered)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// 🔗 استيراد البيانات من ملف التصنيفات
+import { categories } from './categories-data.js';
 
-// TODO: ضع إعدادات مشروعك هنا
-const firebaseConfig = {
-  apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-  authDomain: "projects-catalog.firebaseapp.com",
-  projectId: "projects-catalog",
-  storageBucket: "projects-catalog.firebasestorage.app",
-  messagingSenderId: "813379257336",
-  appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// 🗃️ مصفوفة لتخزين كل المنتجات المعروضة
+let allProducts = [];
 
-// Helpers
-const $ = (s)=>document.querySelector(s);
-const $$ = (s)=>Array.from(document.querySelectorAll(s));
+// 📦 دالة لعرض المنتجات في الصفحة
+function renderProducts(list) {
+  const grid = document.getElementById('grid'); // أو productsGrid حسب ID عندك
+  const count = document.getElementById('prodCount');
 
-const pageTitle = $("#pageTitle");
-const crumbTitle = $("#crumbTitle");
-const grid = $("#grid");
-const pager = $("#pager");
-const searchBox = $("#searchBox");
-const clearBtn = $("#clearBtn");
-const searchFab = $("#searchFab");
+  if (!grid) return;
+  grid.innerHTML = '';
 
-// Drawer
-const openBtn = $("#openDrawer");
-const drawer = $("#drawer");
-const backdrop = $("#backdrop");
-function openDrawer(){ document.body.classList.add("is-side-open"); backdrop.hidden=false; openBtn?.setAttribute("aria-expanded","true"); drawer?.setAttribute("aria-hidden","false"); }
-function closeDrawer(){ document.body.classList.remove("is-side-open"); backdrop.hidden=true; openBtn?.setAttribute("aria-expanded","false"); drawer?.setAttribute("aria-hidden","true"); }
-openBtn?.addEventListener("click", ()=>{ document.body.classList.contains("is-side-open") ? closeDrawer() : openDrawer(); });
-backdrop?.addEventListener("click", closeDrawer);
-document.addEventListener("keydown", e=>{ if(e.key==="Escape" && document.body.classList.contains("is-side-open")) closeDrawer(); });
+  if (count) count.textContent = list.length;
 
-// Read subcategory from URL (e.g., "WC - Wall-Hung")
-const params = new URLSearchParams(location.search);
-const PATH = params.get("title") || "Subcategory";
-pageTitle && (pageTitle.textContent = PATH);
-crumbTitle && (crumbTitle.textContent = PATH);
+  if (!list.length) {
+    grid.innerHTML = `<p style="padding:1rem;color:#6b7280">لا توجد منتجات مطابقة.</p>`;
+    return;
+  }
 
-// Pagination
-const PAGE_SIZE = 16;
-let products = [];
-let filtered = [];
-let page = 1;
+  list.forEach(p => {
+    const { model, brand, factoryCode, sapCode, image, description } = p;
 
-function renderGrid(){
-  grid.innerHTML = "";
-  const start = (page-1)*PAGE_SIZE;
-  const slice = filtered.slice(start, start + PAGE_SIZE);
-  slice.forEach(p => {
-    const card = document.createElement("article");
-    card.className = "card";
+    const card = document.createElement('div');
+    card.className = 'product-card';
     card.innerHTML = `
-      <a class="pic" href="#" tabindex="-1">
-        <img src="${p.imageUrl || "assets/img/placeholder.png"}" alt="${(p.name||p.model||"Product").replace(/"/g, "&quot;")}">
-      </a>
-      <h3><a href="#">${[p.brand, p.model].filter(Boolean).join(" ") || (p.name||"Product")}</a></h3>
-      <p>${p.factoryCode ? `Factory: ${p.factoryCode}` : ""} ${p.sapCode ? ` | SAP: ${p.sapCode}` : ""}</p>
-      <div class="meta">${p.brand || ""} ${p.model || ""}</div>
+      <div class="card">
+        <div class="thumb">
+          <img src="${image || 'assets/img/placeholder.png'}" alt="${model || ''}">
+        </div>
+        <div class="meta">
+          <div class="title">${model || '-'}</div>
+          <div class="sub">Brand: ${brand || '-'}</div>
+          <div class="codes">Factory: ${factoryCode || '-'} | SAP: ${sapCode || '-'}</div>
+        </div>
+      </div>
     `;
     grid.appendChild(card);
   });
-  $("#prodCount") && ($("#prodCount").textContent = String(filtered.length));
+}
 
-  // pager
-  pager.innerHTML = "";
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  for(let i=1;i<=pages;i++){
-    const b = document.createElement("button");
-    b.textContent = String(i);
-    if(i===page) b.className = "is-active";
-    b.addEventListener("click", ()=>{ page=i; renderGrid(); window.scrollTo({top:0, behavior:"smooth"}); });
-    pager.appendChild(b);
+// 🔍 تهيئة البحث المحلي
+function normalize(str) {
+  return (str || '').toString().toLowerCase().trim();
+}
+
+function filterProducts(query) {
+  const n = normalize(query);
+  if (!n) {
+    renderProducts(allProducts);
+    return;
   }
+
+  const filtered = allProducts.filter(p => {
+    const fields = [
+      p.model,
+      p.brand,
+      p.factoryCode,
+      p.sapCode
+    ].map(normalize);
+    return fields.some(f => f.includes(n));
+  });
+
+  renderProducts(filtered);
 }
 
-function applySearch(){
-  const term = (searchBox?.value||"").trim().toLowerCase();
-  filtered = term
-    ? products.filter(p => [p.name, p.brand, p.model, p.sapCode, p.factoryCode]
-          .some(x => String(x||"").toLowerCase().includes(term)))
-    : [...products];
-  page = 1;
-  renderGrid();
+// 🕐 تأخير بسيط لمنع البحث الفوري
+function debounce(fn, delay = 250) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
 }
 
-searchBox?.addEventListener("input", applySearch);
-clearBtn?.addEventListener("click", ()=>{ if(searchBox){ searchBox.value=""; applySearch(); }});
-searchFab?.addEventListener("click", ()=> searchBox?.focus());
+// 🚀 تشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+  // 🧠 معرفة التصنيف الفرعي من عنوان الرابط
+  const urlParams = new URLSearchParams(window.location.search);
+  const title = urlParams.get("title"); // ex: "WC - Wall-Hung"
+  const [category, subcategory] = (title || "").split(" - ").map(s => s?.trim());
 
-async function loadProducts(){
-  // We match the field 'path' that stores the exact label like "WC - Wall-Hung"
-  const qRef = query(collection(db, "products"),
-  where("path", "==", PATH));
-  orderBy("createdAt", "desc")
+  if (category && subcategory && categories[category] && categories[category][subcategory]) {
+    allProducts = categories[category][subcategory];
+    renderProducts(allProducts);
+  }
 
-  const snap = await getDocs(qRef);
-  products = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-  filtered = [...products];
-  renderGrid();
-}
-
-loadProducts().catch(console.error);
+  // ربط البحث
+  const searchEl = document.getElementById('searchInput');
+  if (searchEl) {
+    searchEl.addEventListener('input', debounce(e => {
+      filterProducts(e.target.value);
+    }, 200));
+  }
+});
