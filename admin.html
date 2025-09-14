@@ -75,10 +75,7 @@
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <div class="input">
-          <label>الموديل</label>
-          <input id="sap" placeholder="SAP code">
-        </div>
+        <input id="modelInput" placeholder="اسم الموديل">
         <div class="input">
           <label>كود SAP</label>
           <input id="sap" placeholder="SAP code">
@@ -141,7 +138,8 @@
     [...formCard.querySelectorAll("input,select,button")].forEach(el=>{ if(el.id!=="logout") el.disabled=!en; });
   }
 
-  loginBtn.addEventListener('click', async()=>{
+  const loginBtn = $("#login");
+loginBtn.addEventListener('click', async()=>{
     const email = $("#email").value.trim();
     const password = $("#password").value;
     try{
