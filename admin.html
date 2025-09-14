@@ -5,8 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة إدارة الكتالوج</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- ✅ CSP موسّعة لتعمل مع Firebase Auth/Firestore/Storage على GitHub Pages -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self' https: data:; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com;">
+    content="default-src 'self' https: data:;
+             img-src 'self' https: data:;
+             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+             font-src https://fonts.gstatic.com;
+             script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://accounts.google.com;
+             connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://apis.google.com https://accounts.google.com;
+             frame-src https://apis.google.com https://accounts.google.com;">
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
@@ -21,6 +28,7 @@
     .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
     .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
     .muted{color:#616a77;font-size:13px}
+    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none}
   </style>
 </head>
 <body>
@@ -33,6 +41,7 @@
       <button id="logout" class="btn">تسجيل الخروج</button>
       <div id="uid" class="muted"></div>
     </div>
+    <div id="err" class="err"></div>
 
     <div class="card" style="margin-top:16px">
       <h3>إضافة منتج</h3>
@@ -79,19 +88,19 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // TODO: ضع إعدادات مشروعك هنا
+    // ⚠️ ضع إعدادات مشروعك هنا
     const firebaseConfig = {
-    apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-    authDomain: "projects-catalog.firebaseapp.com",
-    projectId: "projects-catalog",
-    storageBucket: "projects-catalog.firebasestorage.app",
-    messagingSenderId: "813379257336",
-    appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-  };
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "",
+      appId: ""
+    };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -99,11 +108,34 @@
 
     const provider = new GoogleAuthProvider();
     const $ = (s)=>document.querySelector(s);
+    const errBox = $("#err");
+
+    function showErr(e){
+      console.error(e);
+      errBox.textContent = (e && e.message) ? e.message : String(e);
+      errBox.style.display = "block";
+      alert("Firebase: " + errBox.textContent);
+    }
+
+    // Handle redirect result (if popup fails we fallback)
+    getRedirectResult(auth).catch(showErr);
 
     $("#login").addEventListener("click", async()=>{
-      try{ await signInWithPopup(auth, provider); }catch(e){ alert(e.message); }
+      errBox.style.display = "none";
+      try{
+        await signInWithPopup(auth, provider);
+      }catch(e){
+        // Popup blocked or cookies issue → try redirect
+        try{
+          await signInWithRedirect(auth, provider);
+        }catch(e2){
+          showErr(e2);
+        }
+      }
     });
-    $("#logout").addEventListener("click", async()=> signOut(auth));
+    $("#logout").addEventListener("click", async()=>{
+      try{ await signOut(auth); }catch(e){ showErr(e); }
+    });
 
     onAuthStateChanged(auth, (user)=>{
       $("#uid").textContent = user ? `UID: ${user.uid}` : "غير مسجل الدخول";
@@ -135,11 +167,9 @@
         };
         await setDoc(doc(db, "products", id), payload);
         $("#msg").textContent = "✔ تم الحفظ وظهر المنتج في الصفحة الفرعية مباشرة";
-        // مسح الحقول
-        $("#brand").value = $("#model").value = $("#sap").value = $("#factory").value = "";
-        $("#img").value = "";
+        ["brand","model","sap","factory","img"].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ""; });
       }catch(err){
-        $("#msg").textContent = "خطأ: " + err.message;
+        showErr(err);
       }
     });
   </script>
