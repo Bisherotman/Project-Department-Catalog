@@ -14,17 +14,20 @@
              connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;">
   <style>
     body{background:#f6f7f9}
-    .admin{max-width:1000px;margin:24px auto;padding:0 16px}
+    .admin{max-width:1100px;margin:24px auto;padding:0 16px}
     .card{background:#fff;border:1px solid #e6e9f0;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:900px){.row{grid-template-columns:1fr}}
+    @media(max-width:920px){.row{grid-template-columns:1fr}}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:920px){.grid-3{grid-template-columns:1fr}}
     .input{display:grid;gap:6px}
-    .input input,.input textarea,.input select{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
+    .input input,.input select,.input textarea{border:1px solid #e6e9f0;border-radius:10px;padding:10px 12px}
     .btn{border:1px solid #e6e9f0;border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer}
     .btn.primary{background:#6c1d2c;color:#fff;border-color:#6c1d2c}
     .muted{color:#616a77;font-size:13px}
-    .list{display:grid;gap:6px;margin-top:10px}
     .badge{display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px;margin:3px}
+    .err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:8px 12px;display:none;margin-top:8px}
   </style>
 </head>
 <body>
@@ -33,7 +36,7 @@
       <h2 style="margin:0">إدارة الأصناف</h2>
       <div class="muted" style="margin-inline-start:auto"><a href="admin.html">رجوع إلى لوحة المنتجات</a></div>
     </div>
-    <p class="muted">الأصناف هنا **ثابتة** وتُستخدم كقوائم اختيار في لوحة المنتجات.</p>
+    <p class="muted">الأصناف هنا **ثابتة** وتُستخدم كقوائم اختيار في لوحة المنتجات. كما تشمل إدارة البراندات والموديلات.</p>
 
     <!-- Auth -->
     <div class="card">
@@ -49,11 +52,34 @@
       </div>
       <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
         <button id="login" class="btn primary">تسجيل الدخول</button>
-        <button id="logout" class="btn">تسجيل الخروج</button>
+        <button id="logout" class="btn" style="display:none">تسجيل الخروج</button>
         <div id="who" class="muted" style="margin-inline-start:auto"></div>
       </div>
-      <div id="ok" class="ok" style="display:none"></div>
-      <div id="err" class="err" style="display:none;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:8px 12px;margin-top:8px"></div>
+      <div id="ok" class="ok"></div>
+      <div id="err" class="err"></div>
+    </div>
+
+    <!-- إدارة البراند/الموديل -->
+    <div class="card" style="margin-top:12px">
+      <h3>إدارة البراندات والموديلات</h3>
+      <div class="row">
+        <div class="input">
+          <label>إضافة براند</label>
+          <div style="display:flex; gap:8px;">
+            <input id="brandName" placeholder="مثال: GROHE" style="flex:1">
+            <button id="saveBrand" class="btn">حفظ البراند</button>
+          </div>
+        </div>
+        <div class="input">
+          <label>إضافة موديل للبراند المختار</label>
+          <div style="display:flex; gap:8px;">
+            <select id="brandSelect"></select>
+            <input id="modelName" placeholder="اسم الموديل" style="flex:1">
+            <button id="saveModel" class="btn">حفظ الموديل</button>
+          </div>
+          <span class="muted">الموديل يرتبط بالبراند المختار أعلاه.</span>
+        </div>
+      </div>
     </div>
 
     <!-- إضافة/تعديل صنف -->
@@ -79,23 +105,23 @@
     <!-- عرض القوائم الحالية -->
     <div class="card" style="margin-top:12px">
       <h3>القوائم الحالية</h3>
-      <div id="list" class="list"></div>
+      <div id="list"></div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
-  authDomain: "projects-catalog.firebaseapp.com",
-  projectId: "projects-catalog",
-  storageBucket: "projects-catalog.firebasestorage.app",
-  messagingSenderId: "813379257336",
-  appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
-};
+      apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
+      authDomain: "projects-catalog.firebaseapp.com",
+      projectId: "projects-catalog",
+      storageBucket: "projects-catalog.firebasestorage.app",
+      messagingSenderId: "813379257336",
+      appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
+    };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -108,34 +134,72 @@
     function showERR(e){ console.error(e); err.textContent=(e&&e.message)?e.message:String(e); err.style.display="block"; ok.style.display="none"; }
 
     loginBtn.onclick = async()=>{
-      try{ await signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#password").value); showOK("تم تسجيل الدخول"); }catch(e){ showERR(e); }
+      try{
+        await signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#password").value);
+        showOK("تم تسجيل الدخول");
+      }catch(e){ showERR(e); }
     };
-    logoutBtn.onclick = async()=>{ try{ await signOut(auth); showOK("تم تسجيل الخروج"); }catch(e){ showERR(e); } };
+    logoutBtn.onclick = async()=>{
+      try{ await signOut(auth); showOK("تم تسجيل الخروج"); }
+      catch(e){ showERR(e); }
+    };
 
     onAuthStateChanged(auth, (user)=>{
       if(user){
         const name = user.displayName || user.email || 'مستخدم';
         who.textContent = `المستخدم: ${name}`;
-        loginBtn.style.display='none'; $("#email").disabled=true; $("#password").disabled=true;
+        loginBtn.style.display='none'; logoutBtn.style.display='';
+        $("#email").disabled=true; $("#password").disabled=true;
       }else{
-        who.textContent = ""; loginBtn.style.display=''; $("#email").disabled=false; $("#password").disabled=false;
+        who.textContent = ""; loginBtn.style.display=''; logoutBtn.style.display='none';
+        $("#email").disabled=false; $("#password").disabled=false;
       }
     });
 
+    // --------- إدارة البراندات والموديلات ---------
+    async function loadBrandsForAdmin(){
+      const sel = $("#brandSelect"); if(!sel) return;
+      sel.innerHTML = "";
+      const snap = await getDocs(query(collection(db,'brands'), orderBy('__name__'))).catch(()=>null);
+      const arr = []; if(snap){ snap.forEach(d=>arr.push(d.id)); }
+      arr.sort((a,b)=>a.localeCompare(b,'en')).forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+    }
+    $("#saveBrand").onclick = async()=>{
+      const name = ($("#brandName").value||'').trim();
+      if(!name) return;
+      try{
+        await setDoc(doc(db,'brands', name), { createdAt: serverTimestamp() }, { merge:true });
+        showOK("✔ تم حفظ البراند");
+        $("#brandName").value = "";
+        await loadBrandsForAdmin();
+      }catch(e){ showERR(e); }
+    };
+    $("#saveModel").onclick = async()=>{
+      const brand = ($("#brandSelect").value||'').trim();
+      const name = ($("#modelName").value||'').trim();
+      if(!brand) return showERR("اختر البراند أولاً");
+      if(!name) return;
+      try{
+        const id = `${brand}__${name}`;
+        await setDoc(doc(db,'models', id), { brand, name, createdAt: serverTimestamp() }, { merge:true });
+        showOK("✔ تم حفظ الموديل");
+        $("#modelName").value = "";
+      }catch(e){ showERR(e); }
+    };
+
+    // --------- إدارة الأصناف الثابتة ---------
     async function loadList(){
       const wrap = $("#list"); wrap.innerHTML = "";
       const snap = await getDocs(collection(db,'categories_fixed'));
       const items = [];
       snap.forEach(d=> items.push({main:d.id, subs:Array.isArray(d.data().subs)?d.data().subs:[]}));
       items.sort((a,b)=>a.main.localeCompare(b.main,'ar')).forEach(item=>{
-        const div = document.createElement('div');
-        div.innerHTML = `<div><strong>${item.main}</strong></div>`;
+        const block = document.createElement('div'); block.className='card'; block.style.padding='12px'; block.style.marginTop='8px';
+        const title = document.createElement('div'); title.innerHTML = `<strong>${item.main}</strong>`; block.appendChild(title);
         const subs = document.createElement('div');
-        item.subs.forEach(s=>{
-          const b = document.createElement('span'); b.className='badge'; b.textContent=s; subs.appendChild(b);
-        });
-        div.appendChild(subs);
-        wrap.appendChild(div);
+        item.subs.forEach(s=>{ const b = document.createElement('span'); b.className='badge'; b.textContent=s; subs.appendChild(b); });
+        block.appendChild(subs);
+        wrap.appendChild(block);
       });
     }
 
@@ -150,28 +214,24 @@
       }catch(e){ showERR(e); }
     };
 
-    // Seed WC example based on user's list
     $("#seedWC").onclick = async()=>{
       const wc = [
-        "Floor-Standing",
-        "Close-coupled",
-        "Wall-Hung",
-        "Concealed tank",
-        "Flush valve (Ex.)",
-        "Seats & covers",
-        "Eastern",
-        "Handicapped"
+        "Floor-Standing","Close-coupled","Wall-Hung","Concealed tank",
+        "Flush valve (Ex.)","Seats & covers","Eastern","Handicapped"
       ];
       try{
         await setDoc(doc(db,'categories_fixed', 'WC'), { subs: wc, updatedAt: serverTimestamp() }, { merge:true });
         showOK("✔ تم إضافة WC مع القائمة النموذجية");
         await loadList();
-        // Prefill form
         $("#cat").value = "WC"; $("#subs").value = wc.join('\n');
       }catch(e){ showERR(e); }
     };
 
-    loadList().catch(console.error);
+    // Init
+    (async()=>{
+      await loadBrandsForAdmin();
+      await loadList();
+    })().catch(console.error);
   </script>
 </body>
 </html>
