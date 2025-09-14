@@ -4,13 +4,13 @@ import { getFirestore, collection, getDocs, query, where, orderBy } from "https:
 
 // TODO: ضع إعدادات مشروعك هنا
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "",
-  appId: ""
-};
+    apiKey: "AIzaSyDmUg1cQ4HTa0wEThuZAncYOwyZRFtnlsU",
+    authDomain: "projects-catalog.firebaseapp.com",
+    projectId: "projects-catalog",
+    storageBucket: "projects-catalog.firebasestorage.app",
+    messagingSenderId: "813379257336",
+    appId: "1:813379257336:web:b2372449cbe46e15c20c0d"
+  };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
