@@ -153,13 +153,3 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 });
-
-
-  // ربط البحث
-  const searchEl = document.getElementById('searchInput');
-  if (searchEl) {
-    searchEl.addEventListener('input', debounce(e => {
-      filterProducts(e.target.value);
-    }, 200));
-  }
-});
