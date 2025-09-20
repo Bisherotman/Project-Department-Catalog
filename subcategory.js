@@ -99,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
   }
-});
 
   // ربط البحث
   const searchEl = document.getElementById('searchInput');
