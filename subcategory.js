@@ -78,21 +78,26 @@ function debounce(fn, delay = 250) {
 
 // 🚀 تشغيل عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-  // 🧠 معرفة التصنيف الفرعي من عنوان الرابط
   const urlParams = new URLSearchParams(window.location.search);
-  const title = urlParams.get("title"); // ex: "WC - Wall-Hung"
+  const title = urlParams.get("title"); // مثال: WC - Wall-Hung
   const [category, subcategory] = (title || "").split(" - ").map(s => s?.trim());
 
   if (category && subcategory) {
-  // استعلام مباشر من Firestore
-  db.collection('products')
-    .where('cat', '==', category)
-    .where('sub', '==', subcategory)
-    .onSnapshot(snapshot => {
-       allProducts = snapshot.docs.map(doc => doc.data());
-       renderProducts(allProducts);
-    });
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
+      .then(({ collection, query, where, onSnapshot }) => {
+        const q = query(
+          collection(db, "products"),
+          where("cat", "==", category),
+          where("sub", "==", subcategory)
+        );
+
+        onSnapshot(q, (snapshot) => {
+          allProducts = snapshot.docs.map(doc => doc.data());
+          renderProducts(allProducts);
+        });
+      });
   }
+});
 
   // ربط البحث
   const searchEl = document.getElementById('searchInput');
