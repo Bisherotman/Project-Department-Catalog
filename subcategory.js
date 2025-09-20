@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const title = urlParams.get("title"); // مثال: WC - Wall-Hung
   const [category, subcategory] = (title || "").split(" - ").map(s => s?.trim());
 
+  console.log('cat from script:', category, subcategory);
+
   if (category && subcategory) {
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
       .then(({ collection, query, where, onSnapshot }) => {
