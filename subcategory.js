@@ -22,14 +22,14 @@ function renderProducts(list) {
   }
 
   list.forEach(p => {
-    const { model, brand, factoryCode, sapCode, image, description } = p;
+    const { model, brand, factoryCode, sapCode, imageUrl, photo, description } = p;
 
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
       <div class="card">
         <div class="thumb">
-          <img src="${image || 'assets/img/placeholder.png'}" alt="${model || ''}">
+          <img src="${imageUrl || photo || 'assets/img/placeholder.png'}" alt="${model || ''}">
         </div>
         <div class="meta">
           <div class="title">${model || '-'}</div>
