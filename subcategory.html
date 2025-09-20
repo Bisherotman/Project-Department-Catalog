@@ -203,8 +203,24 @@
 
 <div class="title-row"><h1 id="pageTitle">Subcategory</h1></div>
 <nav class="tabs" aria-label="Products tabs"><div class="tab">Products <span class="cnt" id="prodCount">0</span></div></nav>
-<section class="grid" id="grid"></section>
+  
+<!-- 🟢 شريط الفلاتر -->
+<div id="filters" class="filters-bar">
+  <select id="brandFilter">
+    <option value="">كل العلامات التجارية</option>
+  </select>
 
+  <select id="sapFilter">
+    <option value="">جميع المنتجات</option>
+    <option value="with">يحتوي SAP Code</option>
+    <option value="without">بدون SAP Code</option>
+  </select>
+
+  <input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." />
+</div>
+
+<!-- شبكة المنتجات -->
+<section class="grid" id="grid"></section>
 <!-- Pagination -->
 <nav class="pager" id="pager" aria-label="Pages"></nav>
 
