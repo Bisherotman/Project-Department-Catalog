@@ -241,3 +241,16 @@ mark{background:var(--mark); padding:0 .1em}
 /* Floating search */
 .search-fab{position:fixed; right:18px; bottom:18px; z-index:90; width:50px; height:50px; border-radius:999px; border:1px solid var(--line); background:#fff; box-shadow:0 8px 22px rgba(0,0,0,.12); display:grid; place-items:center; cursor:pointer}
 .search-fab svg{width:22px; height:22px; color:#374151}
+
+/* ⬇️ تصغير صور المنتجات داخل الصفحة الفرعية */
+.card .thumb img,
+.card .pic img {
+  max-width: 200px;      /* أقصى عرض */
+  max-height: 200px;     /* أقصى ارتفاع */
+  width: auto;
+  height: auto;
+  object-fit: contain;   /* يحافظ على النسبة بدون قص */
+  display: block;
+  margin: 0 auto;        /* توسيط الصورة */
+}
+
