@@ -1,5 +1,7 @@
 // 🔗 استيراد البيانات من ملف التصنيفات
 import { categories } from './categories-data.js';
+import { db } from './firebase-init.js';
+
 
 // 🗃️ مصفوفة لتخزين كل المنتجات المعروضة
 let allProducts = [];
@@ -81,9 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const title = urlParams.get("title"); // ex: "WC - Wall-Hung"
   const [category, subcategory] = (title || "").split(" - ").map(s => s?.trim());
 
-  if (category && subcategory && categories[category] && categories[category][subcategory]) {
-    allProducts = categories[category][subcategory];
-    renderProducts(allProducts);
+  if (category && subcategory) {
+  // استعلام مباشر من Firestore
+  db.collection('products')
+    .where('cat', '==', category)
+    .where('sub', '==', subcategory)
+    .onSnapshot(snapshot => {
+       allProducts = snapshot.docs.map(doc => doc.data());
+       renderProducts(allProducts);
+    });
   }
 
   // ربط البحث
