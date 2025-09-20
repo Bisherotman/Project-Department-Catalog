@@ -5,25 +5,30 @@ import { db } from './firebase-init.js';
 
 // 🗃️ مصفوفة لتخزين كل المنتجات المعروضة
 let allProducts = [];
+let currentPage = 1;
+const perPage = 24;
 
 // 📦 دالة لعرض المنتجات في الصفحة
-function renderProducts(list) {
-  const grid = document.getElementById('grid'); // أو productsGrid حسب ID عندك
+function renderProducts(list, page = 1) {
+  const grid = document.getElementById('grid');
   const count = document.getElementById('prodCount');
+  const pager = document.getElementById('pager');
 
   if (!grid) return;
   grid.innerHTML = '';
 
   if (count) count.textContent = list.length;
 
-  if (!list.length) {
+  const pageItems = paginate(list, page, perPage);
+
+  if (!pageItems.length) {
     grid.innerHTML = `<p style="padding:1rem;color:#6b7280">لا توجد منتجات مطابقة.</p>`;
+    pager.innerHTML = '';
     return;
   }
 
-  list.forEach(p => {
-    const { model, brand, factoryCode, sapCode, imageUrl, photo, description } = p;
-
+  pageItems.forEach(p => {
+    const { model, brand, factoryCode, sapCode, imageUrl, photo } = p;
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
@@ -40,6 +45,26 @@ function renderProducts(list) {
     `;
     grid.appendChild(card);
   });
+
+  // توليد أزرار الصفحات
+  const totalPages = Math.ceil(list.length / perPage);
+  pager.innerHTML = '';
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = i === page ? 'active-page' : '';
+    btn.addEventListener('click', () => {
+      currentPage = i;
+      renderProducts(list, currentPage);
+    });
+    pager.appendChild(btn);
+  }
+}
+
+
+function paginate(list, page = 1, perPage = 24) {
+  const start = (page - 1) * perPage;
+  return list.slice(start, start + perPage);
 }
 
 // 🔍 تهيئة البحث المحلي
@@ -47,21 +72,28 @@ function normalize(str) {
   return (str || '').toString().toLowerCase().trim();
 }
 
-function filterProducts(query) {
-  const n = normalize(query);
-  if (!n) {
-    renderProducts(allProducts);
-    return;
-  }
+function applyFilters() {
+  const brandVal = document.getElementById('brandFilter').value;
+  const sapVal   = document.getElementById('sapFilter').value;
+  const searchQ  = normalize(document.getElementById('searchInput').value);
 
   const filtered = allProducts.filter(p => {
-    const fields = [
-      p.model,
-      p.brand,
-      p.factoryCode,
-      p.sapCode
-    ].map(normalize);
-    return fields.some(f => f.includes(n));
+    // فلتر براند
+    if (brandVal && p.brand !== brandVal) return false;
+
+    // فلتر SAP
+    const hasSap = !!(p.sapCode && p.sapCode.trim());
+    if (sapVal === 'with' && !hasSap) return false;
+    if (sapVal === 'without' && hasSap) return false;
+
+    // فلتر البحث
+    if (searchQ) {
+      const fields = [p.model, p.brand, p.factoryCode, p.sapCode]
+        .map(normalize);
+      if (!fields.some(f => f.includes(searchQ))) return false;
+    }
+
+    return true;
   });
 
   renderProducts(filtered);
@@ -84,6 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('cat from script:', category, subcategory);
 
+  // ربط الفلاتر مرة واحدة فقط
+  document.getElementById('brandFilter')
+    .addEventListener('change', applyFilters);
+  document.getElementById('sapFilter')
+    .addEventListener('change', applyFilters);
+  document.getElementById('searchInput')
+    .addEventListener('input', debounce(applyFilters, 200));
+
   if (category && subcategory) {
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
       .then(({ collection, query, where, onSnapshot }) => {
@@ -95,10 +135,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         onSnapshot(q, (snapshot) => {
           allProducts = snapshot.docs.map(doc => doc.data());
-          renderProducts(allProducts);
+
+          // 🔹 ملء قائمة البراند تلقائياً
+          const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
+          const brandSelect = document.getElementById('brandFilter');
+          brandSelect.innerHTML = `<option value="">كل العلامات التجارية</option>`;
+          brands.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b;
+            opt.textContent = b;
+            brandSelect.appendChild(opt);
+          });
+
+          // 🔹 تطبيق الفلاتر
+          applyFilters();
         });
       });
   }
+});
+
 
   // ربط البحث
   const searchEl = document.getElementById('searchInput');
